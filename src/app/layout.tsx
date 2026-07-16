@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Manrope } from "next/font/google";
+import { Libre_Baskerville, Manrope, Poppins } from "next/font/google";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -11,6 +11,12 @@ const libre = Libre_Baskerville({
   variable: "--font-libre",
   subsets: ["latin"],
   weight: ["400", "700"],
+});
+
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${libre.variable} h-full antialiased`}
+      className={`${manrope.variable} ${libre.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -42,18 +42,18 @@ export function RotatingHeroCopy({ items }: { items: HeroMessage[] }) {
   const activeItem = items[activeIndex];
 
   return (
-    <div aria-live="polite" className="max-w-[660px] pt-20 sm:pt-24 lg:pt-24">
-      <p className="text-sm font-extrabold tracking-[0.02em] text-white/88">{activeItem.eyebrow}</p>
-      <h1 className="mt-5 max-w-[11ch] font-sans text-5xl font-semibold leading-[0.98] tracking-[-0.05em] text-white sm:text-6xl lg:text-[64px] xl:text-[70px] 2xl:text-[76px]">
+    <div aria-live="polite" className="mx-auto max-w-[660px] pt-8 text-center sm:pt-12 lg:mx-0 lg:pt-24 lg:text-left">
+      <p className="text-xs font-extrabold tracking-[0.02em] text-white/88 sm:text-sm">{activeItem.eyebrow}</p>
+      <h1 className="mx-auto mt-4 max-w-[12ch] font-sans text-4xl font-semibold leading-none tracking-[-0.05em] text-white sm:mt-5 sm:text-6xl lg:mx-0 lg:text-[64px] xl:text-[70px] 2xl:text-[76px]">
         {activeItem.title}
       </h1>
-      <p className="mt-6 max-w-[580px] text-base leading-7 text-white/82 lg:text-[17px]">{activeItem.body}</p>
+      <p className="mx-auto mt-4 max-w-[580px] text-sm leading-6 text-white/82 sm:mt-6 sm:text-base sm:leading-7 lg:mx-0 lg:text-[17px]">{activeItem.body}</p>
       <a
         href={activeItem.href}
-        className="mt-8 inline-flex items-center gap-3 text-sm font-extrabold uppercase tracking-[0.08em] text-white transition hover:text-[var(--gold)]"
+        className="mt-5 inline-flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:text-[var(--gold)] sm:mt-8 sm:text-sm lg:justify-start"
       >
         {activeItem.ctaLabel}
-        <span className="inline-flex h-px w-12 bg-white/70" />
+        <span className="inline-flex h-px w-8 bg-white/70 sm:w-12" />
         <ArrowIcon />
       </a>
     </div>

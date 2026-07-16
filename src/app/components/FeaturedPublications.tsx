@@ -147,9 +147,9 @@ export function FeaturedPublications() {
   const columns = useMemo(() => toColumns(visiblePublications), [visiblePublications]);
 
   return (
-    <section id="publications" className="bg-white py-20 lg:py-28">
+    <section id="publications" className="bg-white py-10 lg:py-12">
       <div className="section-shell">
-        <div className="mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:items-end md:text-left">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--red)]">
               Featured publication
@@ -158,12 +158,12 @@ export function FeaturedPublications() {
               Standards, toolkits and reports.
             </h2>
           </div>
-          <a href="#contact" className="inline-flex items-center gap-2 text-sm font-extrabold">
+          <a href="#contact" className="inline-flex items-center justify-center gap-2 text-sm font-extrabold">
             Request a publication <ArrowIcon />
           </a>
         </div>
         <div
-          className="mb-8 flex gap-2 overflow-x-auto border-b border-[var(--line)] pb-3"
+          className="mb-4 flex gap-2 overflow-x-auto border-b border-[var(--line)] pb-3 sm:justify-center lg:justify-start"
           role="tablist"
           aria-label="Publication categories"
         >
@@ -184,13 +184,13 @@ export function FeaturedPublications() {
           {columns.map((column, columnIndex) => (
             <div
               key={`${activeTab}-${columnIndex}`}
-              className={`grid gap-4 ${activeTab === "all" && (columnIndex === 0 || columnIndex === 2) ? "lg:pt-14" : ""}`}
+              className="grid gap-4"
             >
               {column.map((publication) => (
                 <article
                   id={publication.id}
                   key={publication.title}
-                  className="group relative min-h-[360px] scroll-mt-28 overflow-hidden bg-[var(--soft)] sm:min-h-[390px]"
+                  className="group relative min-h-[330px] scroll-mt-28 overflow-hidden bg-[var(--soft)] sm:min-h-[350px]"
                 >
                   <Image
                     src={publication.image}
@@ -202,7 +202,7 @@ export function FeaturedPublications() {
                   <div className="absolute left-4 top-4 max-w-[calc(100%-2rem)] rounded-md border border-white bg-[#07131d]/46 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white backdrop-blur-sm">
                     {publication.category}
                   </div>
-                  <div className="absolute inset-x-4 bottom-4 rounded-xl bg-white/78 p-4 text-[var(--ink)] shadow-[0_20px_55px_rgba(7,19,29,0.22)] backdrop-blur-md">
+                  <div className="absolute inset-x-4 bottom-4 rounded-xl bg-white/78 p-4 text-center text-[var(--ink)] shadow-[0_20px_55px_rgba(7,19,29,0.22)] backdrop-blur-md sm:text-left">
                     <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--ink)]/78">
                       {publication.type} <span className="ml-1 font-bold">{publication.date}</span>
                     </p>

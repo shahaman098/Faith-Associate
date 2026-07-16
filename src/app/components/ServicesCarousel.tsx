@@ -121,8 +121,8 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
   };
 
   return (
-    <div className="mt-12">
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-8">
+      <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-[var(--muted)]">
           Slide to explore additional services
         </p>
@@ -155,7 +155,7 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
 
       <div
         ref={railRef}
-        className="mt-8 flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-5 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((service) => (
           <article
@@ -172,10 +172,10 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
                 className={`${service.imageClassName} transition duration-500 group-hover:scale-105`}
               />
             </div>
-            <div className="p-7">
+            <div className="p-6 text-center sm:text-left">
               <h3 className="font-display text-2xl font-bold tracking-[-0.03em] text-[var(--ink)]">{service.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{service.body}</p>
-              <a href="#contact" className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--ink)]">
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{service.body}</p>
+              <a href="#contact" className="mt-5 inline-flex items-center justify-center gap-2 text-sm font-extrabold text-[var(--ink)] sm:justify-start">
                 Discuss this service
                 <ArrowIcon direction="right" />
               </a>

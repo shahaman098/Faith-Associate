@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { RotatingHeroCopy } from "../components/RotatingHeroCopy";
 import { RotatingImageBox } from "../components/RotatingImageBox";
+import { SiteHeader } from "../components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "About Us | Faith Associates",
@@ -9,22 +11,22 @@ export const metadata: Metadata = {
     "Learn how Faith Associates builds governance, resilience, leadership and practical standards across faith institutions.",
 };
 
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/#services" },
-  { label: "Publication", href: "/#publications" },
-  { label: "International", href: "/#international" },
-  { label: "Contact us", href: "/#contact" },
+const heroStories = [
+  { label: "Our Mission", href: "#mission", active: true },
+  { label: "Organisation History", href: "#history" },
+  { label: "Our Network", href: "#network" },
+  { label: "Partner Trust", href: "#partners" },
 ];
 
-const utilityLinksLeft = [
-  { label: "Offices", href: "#" },
-  { label: "Media Centre", href: "#" },
-  { label: "Contact us", href: "/#contact" },
+const heroMessages = [
+  {
+    eyebrow: "About Faith Associates",
+    title: "Two decades of practical faith institution support.",
+    body: "Governance, security, leadership and sector partnerships shaped around real community needs.",
+    ctaLabel: "Explore our story",
+    href: "#mission",
+  },
 ];
-
-const utilityLinksRight = ["Call us: 020 3149 6066", "faithassociatesuk@gmail.com"];
 
 const milestones = [
   {
@@ -126,30 +128,18 @@ const networkImages = [
   },
 ];
 
-function SearchIcon() {
-  return (
-    <svg aria-hidden="true" className="size-4" viewBox="0 0 20 20" fill="none">
-      <path
-        d="m14.5 14.5 3 3M8.75 15.25a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  );
-}
-
-function MenuDotsIcon() {
-  return (
-    <svg aria-hidden="true" className="size-4" viewBox="0 0 20 20" fill="none">
-      <path
-        d="M4 10a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 4 10Zm6 0a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 10 10Zm6 0a1.25 1.25 0 1 0 0-2.5A1.25 1.25 0 0 0 16 10Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
+const archiveImages = [
+  {
+    src: "/assets/wp-about/MG_2346.jpg",
+    alt: "Faith Associates audience attending a community leadership presentation",
+    aspectClassName: "aspect-[1.08/1]",
+  },
+  {
+    src: "/assets/wp-about/Faith-Associates-2005-2025-scaled-e1750413022356.jpg",
+    alt: "Faith Associates 2005 to 2025 collage of programmes, partnerships and community events",
+    aspectClassName: "aspect-[1.75/1]",
+  },
+];
 
 function ArrowIcon() {
   return (
@@ -192,86 +182,57 @@ function ValueIcon() {
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white text-[var(--ink)]">
-      <header className="bg-[linear-gradient(180deg,#ede8de_0%,#e4ddd1_100%)] text-[var(--ink)]">
-        <div className="bg-[#101b27] text-[11px] font-medium tracking-[0.08em] text-white/70">
-          <div className="section-shell flex min-h-11 flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-5">
-              {utilityLinksLeft.map((item) => (
-                <Link key={item.label} href={item.href} className="transition hover:text-white">
-                  {item.label}
-                </Link>
+      <SiteHeader />
+
+      <section className="relative isolate min-h-[500px] overflow-hidden bg-[#07131d] text-white sm:min-h-[560px] lg:min-h-[680px] lg:pt-22">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/assets/real/hero-law-society-poster.jpg"
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover opacity-72"
+        >
+          <source src="/assets/real/hero-law-society.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,11,20,0.7),rgba(4,11,20,0.32)_44%,rgba(4,11,20,0.54))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_8%_36%,rgba(255,130,31,0.42),transparent_20%),radial-gradient(circle_at_22%_40%,rgba(214,55,144,0.38),transparent_22%),radial-gradient(circle_at_56%_34%,rgba(92,103,255,0.22),transparent_18%),radial-gradient(circle_at_72%_56%,rgba(255,122,52,0.24),transparent_20%),radial-gradient(circle_at_48%_78%,rgba(195,55,210,0.18),transparent_16%)] opacity-72" />
+        <div className="absolute inset-y-0 left-0 w-[56%] bg-[linear-gradient(90deg,rgba(4,12,22,0.68),rgba(4,12,22,0.08),transparent)]" />
+        <div className="relative z-10 flex min-h-[500px] flex-col justify-between px-5 pb-6 pt-0 sm:min-h-[560px] sm:px-8 lg:min-h-[560px] lg:px-12 lg:pb-7 lg:pt-8 xl:px-16 2xl:px-20">
+          <RotatingHeroCopy items={heroMessages} />
+
+          <div className="mt-6 flex items-end justify-between gap-5 border-t border-white/14 pt-3 text-center sm:mt-8 sm:gap-6 sm:pt-4 lg:text-left">
+            <div className="grid flex-1 grid-cols-2 gap-3 text-white/54 sm:gap-4 lg:grid-cols-4">
+              {heroStories.map((story) => (
+                <a
+                  key={story.label}
+                  href={story.href}
+                  className={`group pt-2 text-sm font-bold tracking-[-0.03em] transition hover:text-white sm:pt-3 sm:text-base ${
+                    story.active ? "text-white" : ""
+                  }`}
+                >
+                  <span className={`mx-auto mb-2 block h-1 w-16 transition sm:mb-4 sm:w-28 lg:mx-0 lg:w-32 ${
+                    story.active ? "bg-[var(--red)]" : "bg-white/10 group-hover:bg-white/30"
+                  }`} />
+                  {story.label}
+                </a>
               ))}
             </div>
-            <div className="flex flex-wrap items-center gap-5">
-              {utilityLinksRight.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
+            <div className="hidden items-center gap-5 text-sm text-white/72 lg:flex">
+              <span>Scroll</span>
+              <span className="inline-flex size-11 items-center justify-center rounded-full border border-white/28">
+                <svg aria-hidden="true" className="size-5" viewBox="0 0 16 16" fill="none">
+                  <path d="m3.5 6 4.5 4.5L12.5 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+                </svg>
+              </span>
             </div>
           </div>
         </div>
+      </section>
 
-        <div className="section-shell flex min-h-20 items-center justify-between border-b border-[rgba(7,26,63,0.08)]">
-          <Link href="/" className="flex items-center" aria-label="Faith Associates home">
-            <Image
-              src="/assets/faith-associates-logo.png"
-              alt="Faith Associates"
-              width={165}
-              height={90}
-              priority
-              className="h-14 w-auto object-contain"
-            />
-          </Link>
-
-          <nav className="hidden items-center gap-7 text-[13px] font-bold text-[var(--ink)]/72 xl:flex">
-            {navItems.map((item) => (
-              <Link key={item.label} href={item.href} className="transition hover:text-[var(--ink)]">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/#contact"
-              className="hidden rounded-full border border-[rgba(7,26,63,0.12)] px-4 py-2 text-xs font-bold text-[var(--ink)]/78 transition hover:border-[var(--ink)] hover:bg-[var(--ink)] hover:text-white lg:inline-flex"
-            >
-              Plan with us
-            </Link>
-            <button
-              type="button"
-              aria-label="Search"
-              className="inline-flex size-9 items-center justify-center rounded-full border border-[rgba(7,26,63,0.12)] text-[var(--ink)]/62 transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
-            >
-              <SearchIcon />
-            </button>
-            <button
-              type="button"
-              aria-label="More"
-              className="inline-flex size-9 items-center justify-center rounded-full border border-[rgba(7,26,63,0.12)] text-[var(--ink)]/62 transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
-            >
-              <MenuDotsIcon />
-            </button>
-          </div>
-        </div>
-
-        <section className="section-shell pb-16 pt-14 sm:pb-20 sm:pt-18">
-          <div className="max-w-3xl">
-            <h1 className="font-sans text-5xl font-semibold tracking-[-0.05em] text-[var(--ink)] sm:text-6xl">
-              About Us
-            </h1>
-            <p className="mt-5 max-w-xl text-sm leading-7 text-[var(--ink)]/68 sm:text-base">
-              Faith Associates helps faith institutions build stronger governance, safer environments and more
-              confident leadership through practical consultancy, training and sector partnerships.
-            </p>
-            <div className="mt-8 h-px w-full max-w-xl bg-[rgba(7,26,63,0.12)]" />
-            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink)]/42">
-              Home Main / About Us
-            </p>
-          </div>
-        </section>
-      </header>
-
-      <section className="grid lg:grid-cols-2">
+      <section id="mission" className="grid scroll-mt-8 lg:grid-cols-2">
         <div className="relative overflow-hidden bg-[#f4f1eb] px-8 py-16 sm:px-12 lg:px-16 lg:py-24">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-full overflow-hidden">
             <div className="absolute -right-20 top-[-18%] size-[420px] rounded-full border border-[rgba(7,26,63,0.08)]" />
@@ -323,7 +284,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-[#111b27] text-white">
+      <section id="history" className="scroll-mt-8 bg-[#111b27] text-white">
         <div className="relative h-[280px] sm:h-[360px] lg:h-[440px]">
           <Image
             src="/assets/real/mosque-expo-awards-hall.jpg"
@@ -434,7 +395,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden bg-white py-20">
+      <section id="network" className="scroll-mt-8 overflow-hidden bg-white py-20">
         <div>
           <div className="bg-[linear-gradient(135deg,#121d2a,#0d1823)] px-8 py-12 text-white sm:px-12 lg:px-16">
             <div className="section-shell flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
@@ -485,7 +446,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-white py-20 lg:py-24">
+      <section id="partners" className="scroll-mt-8 bg-white py-20 lg:py-24">
         <div className="section-shell grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
           <div className="relative min-h-[360px] overflow-hidden bg-[#f3efe8]">
             <Image
@@ -544,16 +505,9 @@ export default function AboutPage() {
       </section>
 
       <section className="relative overflow-hidden bg-[linear-gradient(135deg,#eef5fb,#f7fbff_48%,#edf2f6)] py-20">
-        <div className="absolute inset-y-0 right-0 hidden w-[42%] lg:block">
-          <Image
-            src="/assets/hero-faith-institution.png"
-            alt=""
-            fill
-            sizes="40vw"
-            className="object-cover opacity-30"
-          />
-        </div>
-        <div className="section-shell relative">
+        <div className="pointer-events-none absolute right-[-12%] top-[-14%] hidden size-[440px] rounded-full border border-white/70 lg:block" />
+        <div className="pointer-events-none absolute bottom-[-28%] right-[8%] hidden size-[360px] rounded-full bg-white/55 blur-3xl lg:block" />
+        <div className="section-shell relative grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div className="max-w-xl">
             <p className="text-sm leading-8 text-[var(--muted)]">
               From local institutional development to national sector platforms, Faith Associates helps communities
@@ -565,6 +519,24 @@ export default function AboutPage() {
             >
               Let&apos;s develop together <ArrowIcon />
             </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-[1.05fr_0.95fr] lg:gap-5">
+            {archiveImages.map((image, index) => (
+              <div
+                key={image.src}
+                className={`${image.aspectClassName} relative overflow-hidden rounded-[28px] border border-white/70 bg-white shadow-[0_28px_80px_rgba(35,60,84,0.14)] ${index === 0 ? "sm:row-span-2" : ""}`}
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,24,38,0.02),rgba(10,24,38,0.14))]" />
+              </div>
+            ))}
           </div>
         </div>
       </section>

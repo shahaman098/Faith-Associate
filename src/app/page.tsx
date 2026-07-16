@@ -189,7 +189,7 @@ export default function Home() {
         <div className="relative z-10 flex min-h-[500px] flex-col justify-between px-5 pb-6 pt-0 sm:min-h-[560px] sm:px-8 lg:min-h-[560px] lg:px-12 lg:pb-7 lg:pt-8 xl:px-16 2xl:px-20">
           <RotatingHeroCopy items={heroMessages} />
 
-          <div className="mt-6 flex items-end justify-between gap-5 border-t border-white/14 pt-3 text-center sm:mt-8 sm:gap-6 sm:pt-4 lg:text-left">
+          <div className="mt-6 hidden items-end justify-between gap-5 border-t border-white/14 pt-3 text-center sm:mt-8 sm:gap-6 sm:pt-4 lg:flex lg:text-left">
             <div className="grid flex-1 grid-cols-2 gap-3 text-white/54 sm:gap-4 lg:grid-cols-4">
               {heroStories.map((story) => (
                 <a

@@ -184,7 +184,7 @@ export function SiteHeader() {
               </div>
             ) : null}
           </div>
-          <a href="#" className="flex items-center justify-center" aria-label="Faith Associates home">
+          <Link href="/" className="flex items-center justify-center" aria-label="Faith Associates home">
             <Image
               src="/assets/faith-associates-logo.png"
               alt="Faith Associates"
@@ -193,7 +193,7 @@ export function SiteHeader() {
               priority
               className="h-12 w-auto object-contain sm:h-14"
             />
-          </a>
+          </Link>
           <div className="hidden items-center gap-8 text-[13px] font-bold text-white/82 xl:flex">
             {navItems.map((item) => (
               <a key={item.label} href={item.href} className="inline-flex items-center gap-1 transition hover:text-white">
@@ -203,15 +203,15 @@ export function SiteHeader() {
             ))}
           </div>
           <div className="flex items-center justify-end gap-3 text-sm font-bold text-[var(--ink)] sm:gap-5 lg:text-white/88">
-            <a href="#projects" className="hidden transition hover:text-[var(--red)] sm:inline-flex lg:hover:text-white">
+            <Link href="/#projects" className="hidden transition hover:text-[var(--red)] sm:inline-flex lg:hover:text-white">
               Explore
-            </a>
-            <a
-              href="#contact"
+            </Link>
+            <Link
+              href="/#contact"
               className="inline-flex rounded-full border border-[#3e8491] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.04em] text-[#245362] transition hover:bg-[#3e8491] hover:text-white sm:px-5 lg:hidden"
             >
               Enquire
-            </a>
+            </Link>
             <button type="button" aria-label="Search" className="hidden transition hover:text-white lg:inline-flex">
               <SearchIcon />
             </button>

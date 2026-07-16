@@ -16,18 +16,17 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope);
-  --font-serif: var(--font-libre);
+  --font-sans: var(--font-poppins);
+  --font-serif: var(--font-poppins);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 html {
-  scroll-behavior: smooth;
   overflow-x: hidden;
 }
 
@@ -41,7 +40,7 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-libre), Georgia, serif;
+  font-family: var(--font-poppins), sans-serif;
 }
 
 .section-shell {

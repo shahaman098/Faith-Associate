@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
+import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 type HeroMessage = {
   eyebrow: string;
@@ -24,11 +25,21 @@ function ArrowIcon() {
   );
 }
 
-export function RotatingHeroCopy({ items }: { items: HeroMessage[] }) {
+export function RotatingHeroCopy({
+  items,
+  align = "left",
+  layout = "standard",
+}: {
+  items: HeroMessage[];
+  align?: "left" | "center";
+  layout?: "standard" | "immersive";
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (items.length < 2) return;
+    if (items.length < 2 || paused || prefersReducedMotion) return;
 
     const intervalId = window.setInterval(() => {
       startTransition(() => {
@@ -37,25 +48,61 @@ export function RotatingHeroCopy({ items }: { items: HeroMessage[] }) {
     }, 5000);
 
     return () => window.clearInterval(intervalId);
-  }, [items.length]);
+  }, [items.length, paused, prefersReducedMotion]);
 
   const activeItem = items[activeIndex];
+  const isCentered = align === "center";
+  const isImmersive = layout === "immersive";
+  const wrapperClassName = isCentered
+    ? "mx-auto max-w-[700px] text-center pt-0"
+    : isImmersive
+      ? "mx-auto max-w-[700px] text-center pt-0 lg:mx-0 lg:text-left"
+      : "mx-auto max-w-[700px] text-center pt-10 sm:pt-12 lg:mx-0 lg:pt-24 lg:text-left";
+  const contentAlignClassName = isCentered
+    ? "mx-auto"
+    : isImmersive
+      ? "mx-auto lg:mx-0"
+      : "mx-auto lg:mx-0";
+  const ctaAlignClassName = isCentered
+    ? "justify-center"
+    : isImmersive
+      ? "justify-center lg:justify-start"
+      : "justify-start";
+  const pauseAlignClassName = isCentered
+    ? "mx-auto"
+    : isImmersive
+      ? "mx-auto lg:mx-0"
+      : "mx-0";
 
   return (
-    <div aria-live="polite" className="mx-auto max-w-[660px] pt-8 text-center sm:pt-12 lg:mx-0 lg:pt-24 lg:text-left">
-      <p className="text-xs font-extrabold tracking-[0.02em] text-white/88 sm:text-sm">{activeItem.eyebrow}</p>
-      <h1 className="mx-auto mt-4 max-w-[12ch] font-sans text-4xl font-semibold leading-none tracking-[-0.05em] text-white sm:mt-5 sm:text-6xl lg:mx-0 lg:text-[64px] xl:text-[70px] 2xl:text-[76px]">
+    <div className={wrapperClassName}>
+      <p className="type-eyebrow text-[var(--blue-light)]">{activeItem.eyebrow}</p>
+      <h1
+        className={`type-display mt-4 max-w-[14ch] text-[clamp(2.15rem,5.6vw,4.25rem)] text-white sm:mt-5 ${contentAlignClassName}`}
+      >
         {activeItem.title}
       </h1>
-      <p className="mx-auto mt-4 max-w-[580px] text-sm leading-6 text-white/82 sm:mt-6 sm:text-base sm:leading-7 lg:mx-0 lg:text-[17px]">{activeItem.body}</p>
+      <p
+        className={`type-body mt-5 max-w-[28rem] text-[1rem] text-white/78 sm:mt-6 sm:text-[1.1rem] ${contentAlignClassName}`}
+      >
+        {activeItem.body}
+      </p>
       <a
         href={activeItem.href}
-        className="mt-5 inline-flex items-center justify-center gap-3 text-xs font-extrabold uppercase tracking-[0.08em] text-white transition hover:text-[var(--gold)] sm:mt-8 sm:text-sm lg:justify-start"
+        className={`type-cta mt-8 inline-flex items-center gap-3 border-b border-white/40 pb-1 text-white transition duration-300 hover:border-[var(--blue-light)] hover:text-[var(--blue-light)] sm:mt-10 ${ctaAlignClassName}`}
       >
         {activeItem.ctaLabel}
-        <span className="inline-flex h-px w-8 bg-white/70 sm:w-12" />
         <ArrowIcon />
       </a>
+      {items.length > 1 && !prefersReducedMotion ? (
+        <button
+          type="button"
+          onClick={() => setPaused((isPaused) => !isPaused)}
+          className={`type-meta mt-6 block cursor-pointer text-white/40 transition duration-300 hover:text-white/70 ${pauseAlignClassName}`}
+        >
+          {paused ? "Resume" : "Pause"}
+        </button>
+      ) : null}
     </div>
   );
 }

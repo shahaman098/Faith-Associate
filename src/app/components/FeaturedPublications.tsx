@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { startTransition, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 type Publication = {
   id: string;
@@ -10,94 +11,54 @@ type Publication = {
   date: string;
   title: string;
   image: string;
-  imageClassName: string;
+  href: string;
 };
 
 const featuredPublications: Publication[] = [
-  {
-    id: "activity-report",
-    category: "Governance",
-    type: "Report",
-    date: "2024",
-    title: "Faith Associates 2024 Activity Report",
-    image: "/assets/real/fa-activity-report-2024.png",
-    imageClassName: "object-cover",
-  },
   {
     id: "zakat-guide",
     category: "Mosque Standards",
     type: "Guide",
     date: "2026",
     title: "Mosque Collecting and Distributing Zakat Locally",
-    image: "/assets/real/faith-training-speaker.jpg",
-    imageClassName: "object-cover",
-  },
-  {
-    id: "beacon-awards-booklet",
-    category: "Leadership Development",
-    type: "Booklet",
-    date: "2025",
-    title: "8th British Beacon Mosque Awards 2025 Booklet",
-    image: "/assets/real/beacon-awards-2025-booklet.jpg",
-    imageClassName: "object-contain bg-white p-4",
-  },
-  {
-    id: "security-toolkit",
-    category: "Protective Security",
-    type: "Toolkit",
-    date: "2026",
-    title: "Security in Places of Worship",
-    image: "/assets/real/security-training-session.jpg",
-    imageClassName: "object-cover",
-  },
-  {
-    id: "eco-mosque",
-    category: "Environmental Practice",
-    type: "Research",
-    date: "2025",
-    title: "Eco-Mosque Net Zero Conference Resources",
-    image: "/assets/real/eco-mosque-conference.jpg",
-    imageClassName: "object-cover",
+    image: "https://www.faithassociates.co.uk/wp-content/uploads/2026/03/Al-Fuqara-1.png",
+    href: "/publications/zakat",
   },
   {
     id: "beacon-vision",
-    category: "Public Sector",
-    type: "Vision",
+    category: "Vision",
+    type: "Plan",
     date: "2020-2050",
     title: "Beacon Mosque Vision 2020-2050",
-    image: "/assets/real/mosque-expo-awards-hall.jpg",
-    imageClassName: "object-cover",
+    image: "https://www.faithassociates.co.uk/wp-content/uploads/2019/12/Beacon-Mosque-Vision-2020-50-page-001.jpg",
+    href: "/publications/beacon-mosque-vision-2020-2050",
   },
   {
-    id: "mosque-expo",
-    category: "Community Programmes",
-    type: "Briefing",
-    date: "2026",
-    title: "Mosque Expo 2026 Partner Briefing",
-    image: "/assets/real/mosque-expo-2024-hall.jpg",
-    imageClassName: "object-cover",
+    id: "beacon-awards-booklet",
+    category: "Awards",
+    type: "Booklet",
+    date: "2025",
+    title: "8th British Beacon Mosque Awards 2025 Booklet",
+    image: "https://www.faithassociates.co.uk/wp-content/uploads/2026/01/WhatsApp-Image-2025-11-26-at-17.38.01-600x849-1.jpeg",
+    href: "/publications/8th-british-beacon-mosque-awards-2025-booklet",
   },
   {
-    id: "sport-inclusion",
-    category: "Youth & Sport",
-    type: "Update",
-    date: "2026",
-    title: "Inclusivity in Sport Programme Update",
-    image: "/assets/eman-cup.webp",
-    imageClassName: "object-cover",
+    id: "activity-report",
+    category: "Governance",
+    type: "Report",
+    date: "2024",
+    title: "Faith Associates 2024 Activity Report",
+    image: "https://www.faithassociates.co.uk/wp-content/uploads/2024/12/Faith-Associates-2024-Report-1.png",
+    href: "/publications/faith-associates-2024-activity-report",
   },
 ];
 
 const publicationTabs = [
   { id: "all", label: "All" },
-  { id: "Governance", label: "Governance" },
   { id: "Mosque Standards", label: "Standards" },
-  { id: "Leadership Development", label: "Leadership" },
-  { id: "Protective Security", label: "Security" },
-  { id: "Environmental Practice", label: "Environment" },
-  { id: "Public Sector", label: "Public Sector" },
-  { id: "Community Programmes", label: "Programmes" },
-  { id: "Youth & Sport", label: "Youth & Sport" },
+  { id: "Vision", label: "Vision" },
+  { id: "Awards", label: "Awards" },
+  { id: "Governance", label: "Governance" },
 ];
 
 function ArrowIcon() {
@@ -114,27 +75,45 @@ function ArrowIcon() {
   );
 }
 
-function toColumns(publications: Publication[]) {
-  if (publications.length === featuredPublications.length) {
-    return [
-      [publications[0], publications[4]],
-      [publications[1], publications[5]],
-      [publications[2], publications[6]],
-      [publications[3], publications[7]],
-    ];
-  }
+function PublicationCard({ publication }: { publication: Publication }) {
+  return (
+    <Link
+      id={publication.id}
+      href={publication.href}
+      className="group flex h-full w-full scroll-mt-28 flex-col"
+      aria-label={`Read ${publication.title}`}
+    >
+      <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden bg-[var(--soft)]">
+        <Image
+          src={publication.image}
+          alt=""
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 25vw"
+          className="object-contain object-center transition duration-500 group-hover:scale-[1.03]"
+        />
+      </div>
 
-  return publications.reduce<Publication[][]>(
-    (columns, publication, index) => {
-      columns[index % columns.length].push(publication);
-      return columns;
-    },
-    [[], [], [], []],
+      <div className="mt-4 flex h-[4.75rem] items-start justify-center text-center sm:mt-5 sm:h-[5.25rem]">
+        <h3 className="type-title line-clamp-3 text-[1.05rem] transition duration-300 group-hover:text-[var(--blue)] sm:text-[1.1rem]">
+          {publication.title}
+        </h3>
+      </div>
+    </Link>
   );
 }
 
 export function FeaturedPublications() {
+  const railRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isMobileRail, setIsMobileRail] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches,
+  );
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
 
   const visiblePublications = useMemo(() => {
     if (activeTab === "all") {
@@ -144,74 +123,166 @@ export function FeaturedPublications() {
     return featuredPublications.filter((publication) => publication.category === activeTab);
   }, [activeTab]);
 
-  const columns = useMemo(() => toColumns(visiblePublications), [visiblePublications]);
+  const syncActiveIndex = useEffectEvent(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const cards = Array.from(rail.querySelectorAll<HTMLElement>("[data-publication-slide='true']"));
+    if (cards.length === 0) return;
+
+    const leadingEdge = rail.scrollLeft;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    cards.forEach((card, index) => {
+      const distance = Math.abs(card.offsetLeft - leadingEdge);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    startTransition(() => {
+      setActiveIndex((current) => (current === nearestIndex ? current : nearestIndex));
+    });
+  });
+
+  const autoAdvance = useEffectEvent(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const cards = Array.from(rail.querySelectorAll<HTMLElement>("[data-publication-slide='true']"));
+    if (cards.length <= 1) return;
+
+    const targetIndex = activeIndex >= cards.length - 1 ? 0 : activeIndex + 1;
+    rail.scrollTo({
+      left: cards[targetIndex].offsetLeft - cards[0].offsetLeft,
+      behavior: "smooth",
+    });
+
+    startTransition(() => {
+      setActiveIndex(targetIndex);
+    });
+  });
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileQuery = window.matchMedia("(max-width: 639px)");
+
+    const handleReducedMotion = (event: MediaQueryListEvent) => {
+      setPrefersReducedMotion(event.matches);
+    };
+    const handleMobile = (event: MediaQueryListEvent) => {
+      setIsMobileRail(event.matches);
+    };
+
+    reducedMotion.addEventListener("change", handleReducedMotion);
+    mobileQuery.addEventListener("change", handleMobile);
+
+    return () => {
+      reducedMotion.removeEventListener("change", handleReducedMotion);
+      mobileQuery.removeEventListener("change", handleMobile);
+    };
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    startTransition(() => {
+      setActiveIndex(0);
+    });
+    rail.scrollTo({ left: 0 });
+    syncActiveIndex();
+
+    const handleScroll = () => {
+      syncActiveIndex();
+    };
+
+    rail.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      rail.removeEventListener("scroll", handleScroll);
+    };
+  }, [visiblePublications.length, activeTab]);
+
+  useEffect(() => {
+    if (!isMobileRail || visiblePublications.length <= 1 || isPaused || prefersReducedMotion) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      autoAdvance();
+    }, 4000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [visiblePublications.length, isMobileRail, isPaused, prefersReducedMotion, activeTab]);
 
   return (
-    <section id="publications" className="bg-white py-10 lg:py-12">
+    <section id="publications" className="border-b border-[var(--line)] bg-white py-12 lg:py-20">
       <div className="section-shell">
-        <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:items-end md:text-left">
+        <div className="mb-8 flex flex-col items-center gap-4 text-center md:mb-10">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-[var(--red)]">
-              Featured publication
-            </p>
-            <h2 className="mt-4 font-display text-4xl font-bold tracking-[-0.04em]">
+            <p className="type-eyebrow text-[var(--blue)]">Featured publication</p>
+            <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
               Standards, toolkits and reports.
             </h2>
           </div>
-          <a href="#contact" className="inline-flex items-center justify-center gap-2 text-sm font-extrabold">
-            Request a publication <ArrowIcon />
-          </a>
+          <Link
+            href="/publications"
+            className="type-cta inline-flex items-center justify-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+          >
+            Browse all publications <ArrowIcon />
+          </Link>
         </div>
+
         <div
-          className="mb-4 flex gap-2 overflow-x-auto border-b border-[var(--line)] pb-3 sm:justify-center lg:justify-start"
-          role="tablist"
-          aria-label="Publication categories"
+          className="mb-6 hidden justify-center gap-0 overflow-x-auto border-b border-[var(--line)] sm:flex"
+          role="group"
+          aria-label="Filter featured publications by category"
         >
           {publicationTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
+              aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="shrink-0 cursor-pointer rounded-full border border-[var(--line)] bg-white px-4 py-2 text-xs font-extrabold text-[var(--muted)] transition hover:border-[var(--ink)] hover:text-[var(--ink)] aria-selected:border-[var(--ink)] aria-selected:bg-[var(--ink)] aria-selected:text-white"
+              className="shrink-0 cursor-pointer border-b-2 border-transparent px-4 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-[var(--muted)] transition duration-300 hover:text-[var(--ink)] aria-pressed:border-[var(--blue)] aria-pressed:text-[var(--blue)]"
             >
               {tab.label}
             </button>
           ))}
         </div>
-        <div id="publication-grid" className="grid scroll-mt-24 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-start">
-          {columns.map((column, columnIndex) => (
+
+        <div
+          ref={railRef}
+          id="publication-grid"
+          className="-mx-6 flex scroll-mt-24 snap-x snap-mandatory items-stretch gap-3 overflow-x-auto scroll-smooth px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:items-start sm:gap-5 sm:overflow-visible sm:px-0 sm:py-10 sm:snap-none lg:grid-cols-4 lg:gap-6 lg:py-14 [&::-webkit-scrollbar]:hidden"
+          onPointerEnter={() => setIsPaused(true)}
+          onPointerLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={(event) => {
+            const nextFocusedElement = event.relatedTarget;
+            if (!(nextFocusedElement instanceof Node) || !railRef.current?.contains(nextFocusedElement)) {
+              setIsPaused(false);
+            }
+          }}
+        >
+          {visiblePublications.map((publication, index) => (
             <div
-              key={`${activeTab}-${columnIndex}`}
-              className="grid gap-4"
+              key={publication.id}
+              data-publication-slide="true"
+              className={`flex h-full w-[calc(100vw-2.75rem)] shrink-0 snap-center sm:block sm:h-auto sm:w-auto sm:flex-none sm:snap-none ${
+                index % 2 === 0
+                  ? "sm:-translate-y-5 lg:-translate-y-8"
+                  : "sm:translate-y-5 lg:translate-y-8"
+              }`}
             >
-              {column.map((publication) => (
-                <article
-                  id={publication.id}
-                  key={publication.title}
-                  className="group relative min-h-[330px] scroll-mt-28 overflow-hidden bg-[var(--soft)] sm:min-h-[350px]"
-                >
-                  <Image
-                    src={publication.image}
-                    alt=""
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className={`${publication.imageClassName} transition duration-500 group-hover:scale-105`}
-                  />
-                  <div className="absolute left-4 top-4 max-w-[calc(100%-2rem)] rounded-md border border-white bg-[#07131d]/46 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-white backdrop-blur-sm">
-                    {publication.category}
-                  </div>
-                  <div className="absolute inset-x-4 bottom-4 rounded-xl bg-white/78 p-4 text-center text-[var(--ink)] shadow-[0_20px_55px_rgba(7,19,29,0.22)] backdrop-blur-md sm:text-left">
-                    <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[var(--ink)]/78">
-                      {publication.type} <span className="ml-1 font-bold">{publication.date}</span>
-                    </p>
-                    <h3 className="mt-2 font-display text-xl font-bold leading-tight tracking-[-0.03em]">
-                      {publication.title}
-                    </h3>
-                  </div>
-                </article>
-              ))}
+              <PublicationCard publication={publication} />
             </div>
           ))}
         </div>

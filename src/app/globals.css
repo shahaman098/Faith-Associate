@@ -1,46 +1,327 @@
 @import "tailwindcss";
 
+/*
+  Faith Associates tokens — single source for CSS.
+  JS mirror: src/app/design-system/tokens.ts
+  Docs: src/app/design-system/README.md
+*/
 :root {
+  /* Surfaces */
   --background: #ffffff;
-  --foreground: #071a3f;
-  --ink: #071a3f;
-  --muted: #52627d;
-  --line: rgba(7, 26, 63, 0.14);
-  --blue: #005eb8;
-  --teal: #087f84;
-  --red: #c9272d;
+  --foreground: #0a2342;
+  --ink: #0a2342;
+  --navy: #0b1824;
+  --soft: #f4f7fa;
+  --soft-strong: #e8eef4;
+
+  /* Brand roles:
+     blue = identity / labels / links / focus
+     red  = primary actions only
+     muted / line = secondary chrome */
+  --logo-blue: #0060b0;
+  --blue: #0060b0;
+  --blue-dark: #004a8c;
+  --blue-light: #3d86c4;
+  --teal: #3d6b7a;
+  --red: #cc3f48;
+  --brand: #0060b0;
+  --accent: #cc3f48;
   --gold: #c79a3b;
-  --soft: #f5f8fb;
+  --muted: #5b6d82;
+  --line: rgba(11, 24, 36, 0.12);
+
+  /* Forms */
+  --field-border: #cfd6dc;
+  --field-label: #444444;
+  --field-hint: #888888;
+
+  /* Focus / motion / radius */
+  --focus-ring: rgba(0, 96, 176, 0.9);
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.375rem;
+  --shadow-soft: none;
+  --shadow-lift: none;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 280ms;
+  --duration-media: 600ms;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-poppins);
-  --font-serif: var(--font-poppins);
+  --color-ink: var(--ink);
+  --color-navy: var(--navy);
+  --color-muted: var(--muted);
+  --color-blue: var(--blue);
+  --color-blue-dark: var(--blue-dark);
+  --color-blue-light: var(--blue-light);
+  --color-red: var(--red);
+  --color-soft: var(--soft);
+  --color-soft-strong: var(--soft-strong);
+  --font-sans: var(--font-source-sans);
+  --font-serif: var(--font-source-sans);
+  --font-display: var(--font-source-sans);
+  --font-mono: var(--font-source-sans);
+}
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+optgroup {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-poppins), sans-serif;
-}
-
-html {
   overflow-x: hidden;
 }
 
-body {
-  overflow-x: hidden;
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
 }
 
 ::selection {
-  background: rgba(201, 39, 45, 0.16);
+  background: rgba(0, 96, 176, 0.16);
   color: var(--ink);
 }
 
-.font-display {
-  font-family: var(--font-poppins), sans-serif;
+/* Skip link — first focusable control in the document */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+.font-sans {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display,
+.font-serif {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Consulting type roles — Source Sans with clear hierarchy */
+.type-eyebrow {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.type-display {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.type-title {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.type-body {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.7;
+}
+
+.type-meta {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.type-cta {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* Sharp editorial surfaces — consulting, not consumer app */
+.surface-card {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.surface-card:hover {
+  border-color: rgba(0, 96, 176, 0.45);
+}
+
+.media-frame {
+  overflow: hidden;
+  border-radius: 0;
+  background: var(--soft-strong);
+}
+
+.media-frame img,
+.media-frame [data-next-image] {
+  transition: transform var(--duration-media) var(--ease-out);
+}
+
+.group:hover .media-frame img,
+.group:hover .media-zoom {
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .media-frame img,
+  .group:hover .media-zoom {
+    transform: none;
+  }
+}
+
+.capability-index {
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--blue);
+}
+
+.accent-rule {
+  width: 2rem;
+  height: 1px;
+  background: var(--blue);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--red);
+  color: #fff;
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.btn-primary:hover {
+  background: var(--blue-dark);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+/* Form primitives — prefer over one-off field styles */
+.field-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--field-label);
+}
+
+.field {
+  margin-top: 0.375rem;
+  width: 100%;
+  border: 1px solid var(--field-border);
+  border-radius: 0;
+  background: #fff;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.9375rem;
+  color: #333;
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.field:focus,
+.field:focus-visible {
+  border-color: var(--blue);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+.field-hint {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--field-hint);
+}
+
+.field-error {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--red);
 }
 
 .section-shell {
@@ -51,5 +332,44 @@ body {
 @media (max-width: 640px) {
   .section-shell {
     width: min(100% - 28px, 1280px);
+  }
+}
+
+.section-head {
+  max-width: 40rem;
+}
+
+.section-head--center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .section-head--split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 2.5rem;
+    align-items: end;
+    max-width: none;
+    text-align: left;
+  }
+
+  .section-head--split .section-head__copy {
+    max-width: 34rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

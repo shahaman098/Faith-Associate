@@ -1,0 +1,249 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { SiteFooter } from "../../components/SiteFooter";
+import { SiteHeader } from "../../components/SiteHeader";
+import { ZohoFormEmbed } from "../../components/ZohoFormEmbed";
+import { getPublication, publications } from "../../data/publications";
+
+export function generateStaticParams() {
+  return publications.map(({ slug }) => ({ slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const publication = getPublication(slug);
+  if (!publication) return {};
+  return { title: `${publication.title} | Faith Associates`, description: publication.summary };
+}
+
+function ArrowIcon() {
+  return (
+    <svg aria-hidden="true" className="size-4" viewBox="0 0 16 16" fill="none">
+      <path
+        d="M3 8h9M8.5 3.5 13 8l-4.5 4.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+export default async function PublicationPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const publication = getPublication(slug);
+  if (!publication) notFound();
+
+  const related = publications
+    .filter((item) => item.slug !== publication.slug && item.category === publication.category)
+    .slice(0, 3);
+
+  return (
+    <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
+      <SiteHeader />
+      <section className="relative overflow-hidden bg-[var(--navy)] pb-16 pt-40 text-white lg:pb-24 lg:pt-52">
+        <div className="section-shell relative grid gap-12 lg:grid-cols-[1.22fr_0.78fr] lg:items-end lg:gap-20">
+          <div>
+            <Link
+              href="/publications"
+              className="type-meta text-white/48 transition hover:text-white"
+            >
+              Publications / {publication.category}
+            </Link>
+            <h1 className="type-display mt-6 max-w-[15ch] text-[clamp(2.5rem,5vw,4.5rem)]">
+              {publication.title}
+            </h1>
+            <p className="type-body mt-6 max-w-2xl text-base text-white/72 sm:text-lg">
+              {publication.summary}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-white/12 pt-5 type-meta text-white/44">
+              <span>{publication.format}</span>
+              <span>{publication.year}</span>
+              <span>{publication.category}</span>
+            </div>
+          </div>
+          <div className="media-frame relative mx-auto aspect-[0.72/1] w-full max-w-[380px] bg-white lg:mx-0 lg:justify-self-end">
+            <Image
+              src={publication.image}
+              alt={`${publication.title} cover`}
+              fill
+              unoptimized
+              priority
+              loading="eager"
+              sizes="(max-width: 1024px) 80vw, 32vw"
+              className="object-contain p-4"
+            />
+          </div>
+        </div>
+      </section>
+
+      {publication.isLegacy ? (
+        <div className="border-b border-[var(--line)] bg-[var(--soft)]">
+          <div className="section-shell flex items-start gap-4 py-5 text-sm leading-6 text-[var(--muted)]">
+            <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center bg-[var(--navy)] text-[10px] font-bold text-white">
+              !
+            </span>
+            <p>
+              <strong className="text-[var(--ink)]">Archived operational guidance.</strong> This
+              resource is preserved for historical reference and may not reflect current public-health,
+              legal or regulatory requirements.
+            </p>
+          </div>
+        </div>
+      ) : null}
+
+      <section className="py-12 lg:py-20">
+        <div className="section-shell grid gap-12 lg:grid-cols-[0.75fr_1.35fr] lg:gap-20">
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <p className="type-eyebrow text-[var(--blue)]">Access the resource</p>
+            {publication.downloadUrl ? (
+              <a href={publication.downloadUrl} target="_blank" rel="noreferrer" className="btn-primary mt-5">
+                Download publication <ArrowIcon />
+              </a>
+            ) : publication.zohoFormUrl ? (
+              <a href="#request-form" className="btn-primary mt-5">
+                Request this publication <ArrowIcon />
+              </a>
+            ) : (
+              <Link
+                href={`/contact?publication=${encodeURIComponent(publication.title)}`}
+                className="btn-primary mt-5"
+              >
+                Request this publication <ArrowIcon />
+              </Link>
+            )}
+            <div className="type-body mt-8 border-t border-[var(--line)] pt-6 text-xs text-[var(--muted)]">
+              <p>Published by Faith Associates</p>
+              <p>Resource type: {publication.format}</p>
+              <p>Catalogue year: {publication.year}</p>
+            </div>
+          </aside>
+
+          <article className="max-w-3xl">
+            <p className="type-eyebrow text-[var(--blue)]">Overview</p>
+            <h2 className="type-display mt-5 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
+              Guidance grounded in sector experience.
+            </h2>
+            <p className="type-title mt-8 text-[1.25rem] text-[var(--ink)] sm:text-[1.4rem]">
+              {publication.summary}
+            </p>
+            <p className="type-body mt-6 text-[var(--muted)]">
+              Faith Associates develops publications from direct work with faith institutions,
+              leadership teams and delivery partners. The aim is to turn field learning into practical
+              material that can inform discussion, planning and implementation.
+            </p>
+
+            {publication.zohoFormUrl ? (
+              <div id="request-form" className="mt-12 scroll-mt-28 border-t border-[var(--line)] pt-10">
+                <p className="type-eyebrow text-[var(--blue)]">Request this publication</p>
+                <h2 className="type-display mt-5 text-[clamp(1.65rem,3vw,2.25rem)] text-[var(--ink)]">
+                  Complete the form below.
+                </h2>
+                <p className="type-body mt-4 max-w-2xl text-[var(--muted)]">
+                  Register your details to receive this publication from Faith Associates.
+                </p>
+                <div className="mt-8">
+                  <ZohoFormEmbed
+                    src={publication.zohoFormUrl}
+                    title={`${publication.title} request form`}
+                    height={publication.zohoFormUrl.includes("zfrmz.eu") ? 650 : 700}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-12 border-y border-[var(--line)] bg-[var(--soft)] px-6 py-8 sm:px-9">
+              <p className="type-eyebrow text-[var(--blue)]">Using this publication</p>
+              <ul className="mt-6 grid gap-4 text-sm leading-7 text-[var(--muted)]">
+                <li className="flex gap-4">
+                  <span className="capability-index">01</span>
+                  <span>
+                    Review the resource with the people responsible for governance or delivery in your
+                    institution.
+                  </span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="capability-index">02</span>
+                  <span>
+                    Adapt recommendations to your context, legal duties, risk profile and available
+                    capacity.
+                  </span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="capability-index">03</span>
+                  <span>
+                    Turn agreed actions into named responsibilities, timescales and a clear review
+                    point.
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <h2 className="type-display mt-12 text-[clamp(1.65rem,3vw,2.25rem)] text-[var(--ink)]">
+              Need help implementing it?
+            </h2>
+            <p className="type-body mt-5 text-[var(--muted)]">
+              The Faith Associates team can support training, review, policy development and
+              implementation linked to this area of work.
+            </p>
+            <Link
+              href="/contact"
+              className="type-cta mt-6 inline-flex items-center gap-3 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+            >
+              Talk to the team <ArrowIcon />
+            </Link>
+          </article>
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--line)] bg-[var(--soft)] py-12 lg:py-20">
+        <div className="section-shell">
+          <div className="flex items-end justify-between gap-5">
+            <div>
+              <p className="type-eyebrow text-[var(--blue)]">Continue reading</p>
+              <h2 className="type-display mt-4 text-[clamp(1.75rem,3.2vw,2.5rem)] text-[var(--ink)]">
+                Related publications
+              </h2>
+            </div>
+            <Link
+              href="/publications"
+              className="type-cta hidden items-center gap-2 text-[var(--blue)] sm:inline-flex"
+            >
+              View library <ArrowIcon />
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {related.map((item) => (
+              <Link href={`/publications/${item.slug}`} key={item.slug} className="group bg-white p-5">
+                <div className="media-frame relative aspect-[0.82/1] bg-[var(--soft)]">
+                  <Image
+                    src={item.image}
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain p-4 transition duration-500 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <p className="type-meta mt-5 text-[var(--blue)]">
+                  {item.format} / {item.year}
+                </p>
+                <h3 className="type-title mt-3 text-[1.2rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)]">
+                  {item.title}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+      <SiteFooter />
+    </main>
+  );
+}

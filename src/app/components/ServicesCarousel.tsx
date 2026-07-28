@@ -282,7 +282,7 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
               {/* Mask baked-in artwork + build a modern caption plane */}
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,19,29,0.08)_0%,rgba(7,19,29,0.2)_38%,rgba(7,19,29,0.82)_72%,rgba(7,19,29,0.96)_100%)] transition duration-500 group-hover:bg-[linear-gradient(180deg,rgba(7,19,29,0.12)_0%,rgba(7,19,29,0.28)_34%,rgba(7,19,29,0.88)_70%,rgba(7,19,29,0.98)_100%)]"
+                className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(7,19,29,0.08)_0%,rgba(7,19,29,0.2)_38%,rgba(7,19,29,0.82)_72%,rgba(7,19,29,0.96)_100%)] transition duration-500 group-hover:bg-[linear-gradient(180deg,rgba(7,19,29,0.12)_0%,rgba(7,19,29,0.28)_34%,rgba(7,19,29,0.88)_70%,rgba(7,19,29,0.98)_100%)]"
               />
 
               <div className="relative z-10 flex flex-col gap-4 p-5 sm:gap-5 sm:p-6 lg:p-7">

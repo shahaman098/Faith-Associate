@@ -6,6 +6,7 @@ import { EditorialHero } from "./EditorialHero";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { ZohoFormEmbed } from "./ZohoFormEmbed";
+import type { SiteSettingsData } from "@/lib/cms/types";
 
 function ArrowIcon() {
   return (
@@ -21,7 +22,7 @@ function ArrowIcon() {
   );
 }
 
-export function EditorialDetailPage({ data }: { data: EditorialPageData }) {
+export function EditorialDetailPage({ data, settings }: { data: EditorialPageData; settings?: SiteSettingsData | null }) {
   const related = publications
     .filter((publication) => {
       const words = `${data.title} ${data.summary}`
@@ -39,7 +40,7 @@ export function EditorialDetailPage({ data }: { data: EditorialPageData }) {
 
   return (
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
         eyebrow={data.eyebrow}
         title={data.title}
@@ -206,7 +207,7 @@ export function EditorialDetailPage({ data }: { data: EditorialPageData }) {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
   );
 }

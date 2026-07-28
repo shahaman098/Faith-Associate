@@ -5,6 +5,7 @@ import type { CatalogueLink, ServiceCatalogue } from "../data/service-catalogues
 import { EditorialHero } from "./EditorialHero";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
+import type { SiteSettingsData } from "@/lib/cms/types";
 
 function ArrowIcon() {
   return (
@@ -93,15 +94,17 @@ function SectionNav({ sections }: { sections: ServiceCatalogue["sections"] }) {
 export function ServiceCataloguePage({
   category,
   catalogue,
+  settings,
 }: {
   category: EditorialPageData;
   catalogue: ServiceCatalogue;
+  settings?: SiteSettingsData | null;
 }) {
   const isSafety = catalogue.variant === "safety";
 
   return (
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
         eyebrow={category.eyebrow}
         title={isSafety ? "Safety experts in faith-based establishments." : category.title}
@@ -241,7 +244,7 @@ export function ServiceCataloguePage({
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
   );
 }

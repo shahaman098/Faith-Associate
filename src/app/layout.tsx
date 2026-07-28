@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Source_Sans_3 } from "next/font/google";
 import { SkipLink } from "./components/SkipLink";
+import { CmsShell } from "./components/cms/CmsShell";
+import { getEditorSession } from "@/lib/cms/actions";
+import { getSiteSettings } from "@/lib/cms/queries";
 import "./globals.css";
 
 const sourceSans = Source_Sans_3({
@@ -52,11 +55,13 @@ export const metadata: Metadata = {
   category: "consulting",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getEditorSession();
+  const settings = await getSiteSettings({ preferDraft: Boolean(session) });
   return (
     <html
       lang="en"
@@ -65,7 +70,9 @@ export default function RootLayout({
     >
       <body className={`${sourceSans.className} flex min-h-full flex-col font-sans antialiased`}>
         <SkipLink />
-        {children}
+        <CmsShell isEditor={Boolean(session)} email={session?.email} settings={settings}>
+          {children}
+        </CmsShell>
       </body>
     </html>
   );

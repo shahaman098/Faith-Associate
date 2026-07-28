@@ -4,6 +4,10 @@ import { EditorialHero } from "../components/EditorialHero";
 import { InternationalPresenceSection } from "../components/InternationalPresenceSection";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntries } from "@/lib/cms/queries";
+import type { InternationalRegion } from "../components/InternationalMap";
 
 export const metadata: Metadata = {
   title: "International | Faith Associates",
@@ -11,15 +15,20 @@ export const metadata: Metadata = {
     "Faith Associates works with communities and international organisations across Europe, Africa, the Middle East, North America and Australasia.",
 };
 
-export default function InternationalPage() {
+export default async function InternationalPage() {
+  const { settings, page, preferDraft } = await loadCmsPage("/international");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
+  const regions = (await getEntries("region", { preferDraft })).map((entry) => ({ id: entry.slug, ...entry.data })) as InternationalRegion[];
   return (
+    <CmsPage path="/international" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
-        eyebrow="International"
-        title="Connected leadership across five continents."
-        summary="Sustainable partnerships, institutional development and knowledge exchange shaped with communities—not simply delivered to them."
-        image="/assets/real/beacon-awards-stage.jpg"
+        eyebrow={hero?.eyebrow ?? "International"}
+        title={hero?.title ?? "Connected leadership across five continents."}
+        summary={hero?.summary ?? "Sustainable partnerships, institutional development and knowledge exchange shaped with communities—not simply delivered to them."}
+        image={hero?.image ?? "/assets/real/beacon-awards-stage.jpg"}
         primaryLabel="Discuss a partnership"
         primaryHref="/contact"
       />
@@ -45,7 +54,7 @@ export default function InternationalPage() {
         </div>
       </section>
 
-      <InternationalPresenceSection />
+      <InternationalPresenceSection regions={regions.length ? regions : undefined} />
 
       <section className="bg-[var(--navy)] py-16 text-white lg:py-24">
         <div className="section-shell grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:gap-20">
@@ -66,7 +75,8 @@ export default function InternationalPage() {
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

@@ -6,6 +6,9 @@ import { PublicationExplorer } from "../components/PublicationExplorer";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
 import { publications } from "../data/publications";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntries } from "@/lib/cms/queries";
 
 export const metadata: Metadata = {
   title: "Publications & Toolkits | Faith Associates",
@@ -27,20 +30,26 @@ function ArrowIcon() {
   );
 }
 
-export default function PublicationsPage() {
-  const featured = publications.find((publication) => publication.slug === "zakat") ?? publications[0];
-  const recommended = publications
+export default async function PublicationsPage() {
+  const { settings, page, preferDraft } = await loadCmsPage("/publications");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
+  const entries = await getEntries("publication", { preferDraft });
+  const catalogue = entries.length ? (entries.map((entry) => ({ slug: entry.slug, ...entry.data })) as typeof publications) : publications;
+  const featured = catalogue.find((publication) => publication.slug === "zakat") ?? catalogue[0];
+  const recommended = catalogue
     .filter((publication) => !publication.isLegacy && publication.slug !== featured.slug)
     .slice(0, 3);
 
   return (
+    <CmsPage path="/publications" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
-        eyebrow="Ideas & resources"
-        title="Publications built for practical use."
-        summary="Reports, toolkits and guidance drawn from more than two decades of work with faith institutions and community partners."
-        image="/assets/real/fa-activity-report-2024.png"
+        eyebrow={hero?.eyebrow ?? "Ideas & resources"}
+        title={hero?.title ?? "Publications built for practical use."}
+        summary={hero?.summary ?? "Reports, toolkits and guidance drawn from more than two decades of work with faith institutions and community partners."}
+        image={hero?.image ?? "/assets/real/fa-activity-report-2024.png"}
         primaryLabel="Explore the library"
         primaryHref="#library"
       />
@@ -103,7 +112,8 @@ export default function PublicationsPage() {
       <div id="library" className="scroll-mt-4">
         <PublicationExplorer />
       </div>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

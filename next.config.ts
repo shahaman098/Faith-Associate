@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "www.faithassociates.co.uk",
         pathname: "/wp-content/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "ihfuankbsfpibldanznw.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
     ],
   },
   async redirects() {
@@ -59,6 +64,11 @@ const nextConfig: NextConfig = {
       { source: "/blog", destination: "/news", permanent: true },
       { source: "/events-grid", destination: "/events", permanent: true },
       { source: "/events-modern", destination: "/events", permanent: true },
+      {
+        source: "/portfolio/national-emergency-conference-uk-mosque-safety-and-security",
+        destination: "/events/national-emergency-conference-uk-mosque-safety-and-security",
+        permanent: true,
+      },
       { source: "/contact-us", destination: "/contact", permanent: true },
       { source: "/privacy-policy", destination: "/privacy", permanent: true },
     ];

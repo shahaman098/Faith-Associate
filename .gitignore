@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling / generated CMS seed artifacts
+.cursor/
+.playwright-cli/
+scripts/seed-sql/
+scripts/seed-batches/
+scripts/seed-json-chunks/
+scripts/seed-rpc/

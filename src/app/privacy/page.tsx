@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Faith Associates",
@@ -43,15 +45,19 @@ const sections = [
   ],
 ];
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { settings, page } = await loadCmsPage("/privacy");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
   return (
+    <CmsPage path="/privacy" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
-        eyebrow="Legal"
-        title="Privacy policy"
-        summary="How Faith Associates collects, uses and protects personal information."
-        image="/assets/real/about-fa-training-room.png"
+        eyebrow={hero?.eyebrow ?? "Legal"}
+        title={hero?.title ?? "Privacy policy"}
+        summary={hero?.summary ?? "How Faith Associates collects, uses and protects personal information."}
+        image={hero?.image ?? "/assets/real/about-fa-training-room.png"}
       />
       <section className="py-12 lg:py-20">
         <div className="section-shell max-w-4xl">
@@ -72,7 +78,8 @@ export default function PrivacyPage() {
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

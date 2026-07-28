@@ -5,6 +5,8 @@ import { EditorialHero } from "../components/EditorialHero";
 import { RotatingImageBox } from "../components/RotatingImageBox";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
   title: "About Us | Faith Associates",
@@ -218,16 +220,20 @@ function ValueIcon({ type }: { type: (typeof valueCards)[number]["icon"] }) {
   );
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const { settings, page } = await loadCmsPage("/about");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
   return (
+    <CmsPage path="/about" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
 
       <EditorialHero
-        eyebrow="About Faith Associates"
-        title="Two decades of practical faith institution support."
-        summary="Governance, security, leadership and sector partnerships shaped around real community needs."
-        image="/assets/real/hero-law-society-poster.jpg"
+        eyebrow={hero?.eyebrow ?? "About Faith Associates"}
+        title={hero?.title ?? "Two decades of practical faith institution support."}
+        summary={hero?.summary ?? "Governance, security, leadership and sector partnerships shaped around real community needs."}
+        image={hero?.image ?? "/assets/real/hero-law-society-poster.jpg"}
         primaryLabel="Explore our story"
         primaryHref="#mission"
         secondaryLabel="Contact the team"
@@ -524,7 +530,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

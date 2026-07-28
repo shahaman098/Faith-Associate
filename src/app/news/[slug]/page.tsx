@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "../../components/SiteFooter";
 import { SiteHeader } from "../../components/SiteHeader";
 import { newsItems } from "../../data/site-content";
+import { CmsPage } from "../../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntry } from "@/lib/cms/queries";
 
 export function generateStaticParams() {
   return newsItems.map(({ slug }) => ({ slug }));
@@ -22,12 +25,15 @@ export async function generateMetadata({
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const item = newsItems.find((entry) => entry.slug === slug);
+  const { settings, page, preferDraft } = await loadCmsPage(`/news/${slug}`);
+  const entry = await getEntry("news", slug, { preferDraft });
+  const item = entry ? ({ slug: entry.slug, ...entry.data } as typeof newsItems[number]) : newsItems.find((entry) => entry.slug === slug);
   if (!item) notFound();
 
   return (
+    <CmsPage path={`/news/${slug}`} blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <section className="relative min-h-[580px] overflow-hidden bg-[var(--navy)] pt-40 text-white lg:pt-52">
         <Image
           src={item.image}
@@ -69,7 +75,8 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ slu
           </Link>
         </article>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

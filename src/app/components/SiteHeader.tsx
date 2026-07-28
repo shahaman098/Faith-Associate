@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { SiteSettingsData } from "@/lib/cms/types";
+import { EditableText } from "./cms/EditableText";
+import { useEdit } from "./cms/EditProvider";
 
-const navigation = [
+const defaultNavigation: SiteSettingsData["header"]["navigation"] = [
   {
     label: "About",
     href: "/about",
@@ -52,16 +55,6 @@ const navigation = [
       ["Events", "/events"],
     ],
   },
-];
-
-const mobileNavigation = [
-  { label: "Home", href: "/" },
-  ...navigation.filter((item) =>
-    ["About", "Services", "Projects"].includes(item.label),
-  ),
-  ...navigation.filter((item) => item.label === "Publications"),
-  ...navigation.filter((item) => item.label === "International"),
-  { label: "Contact us", href: "/contact" },
 ];
 
 function MenuIcon() {
@@ -118,13 +111,11 @@ const socialLinks = [
     ),
   },
   {
-    label: "Instagram",
-    href: "https://www.instagram.com/faithassociates/",
+    label: "Facebook",
+    href: "https://www.facebook.com/FaithAssociates1/",
     icon: (
-      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03H7.9v-2.9h2.4V9.86c0-2.37 1.41-3.68 3.56-3.68 1.03 0 2.12.18 2.12.18v2.33h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.9h-2.22V22c4.78-.75 8.44-4.91 8.44-9.93z" />
       </svg>
     ),
   },
@@ -158,7 +149,24 @@ function SocialLinks({ className = "" }: { className?: string }) {
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ settings }: { settings?: SiteSettingsData | null }) {
+  const { settings: liveSettings } = useEdit();
+  const header = liveSettings?.header ?? settings?.header;
+  const navigation = header?.navigation ?? defaultNavigation;
+  const mobileNavigation = useMemo(
+    () => [
+      { label: "Home", href: "/" },
+      ...navigation.filter((item) => ["About", "Services", "Projects"].includes(item.label)),
+      ...navigation.filter((item) => item.label === "Publications"),
+      ...navigation.filter((item) => item.label === "International"),
+      { label: "Contact us", href: "/contact" },
+    ],
+    [navigation],
+  );
+  const tagline = header?.tagline ?? "Building standards across the globe";
+  const phone = header?.phone ?? "+44 (0) 1494 416202";
+  const phoneTel = phone.replace(/[^\d+]/g, "") || "+441494416202";
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -219,15 +227,20 @@ export function SiteHeader() {
       {/* Desktop utility bar */}
       <div className="hidden border-b border-white/10 bg-[#0b1824]/86 text-white backdrop-blur-md lg:block">
         <div className="section-shell flex h-9 items-center justify-between text-[10px] font-bold uppercase tracking-[0.14em] text-white/58">
-          <p>Building standards across the globe</p>
+          <EditableText
+            value={tagline}
+            path="header.tagline"
+            scope="settings"
+            as="p"
+          />
           <div className="flex items-center gap-5">
             <SocialLinks />
             <span aria-hidden="true" className="h-3 w-px bg-white/20" />
             <Link href="/news" className="transition hover:text-white">
               Media centre
             </Link>
-            <a href="tel:+441494416202" className="transition hover:text-white">
-              +44 (0) 1494 416202
+            <a href={`tel:${phoneTel}`} className="transition hover:text-white">
+              <EditableText value={phone} path="header.phone" scope="settings" as="span" />
             </a>
             <Link href="/contact" className="transition hover:text-white">
               Contact

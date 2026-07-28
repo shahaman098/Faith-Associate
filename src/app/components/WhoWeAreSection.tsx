@@ -3,6 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import type { HomeBlocks } from "@/lib/cms/types";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 const missionSlides = [
   {
@@ -38,15 +41,27 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-export function WhoWeAreSection() {
+export function WhoWeAreSection({ content }: { content?: HomeBlocks["whoWeAre"] }) {
+  const data = content ?? {
+    eyebrow: "Who we are",
+    title: "We work with you to raise standards in faith institutions.",
+    body: [
+      "Faith Associates is a specialist consultancy helping mosques, madrassahs and community organisations overcome critical challenges and seize their greatest opportunities.",
+      "Our work is rooted in deep collaboration across a global network of practitioners dedicated to building capable, resilient and trusted faith institutions every day.",
+    ],
+    image: "/assets/real/who-we-are-roundtable.jpg",
+    imageAlt: "Faith Associates roundtable with community leaders at Al Manaar",
+    ctaLabel: "More About Us", ctaHref: "/about", statValue: "5000+", statLabel: "Mosques",
+    statSublabel: "Supported across communities", slides: missionSlides,
+  };
   const [missionIndex, setMissionIndex] = useState(0);
-  const mission = missionSlides[missionIndex];
+  const mission = data.slides[missionIndex] ?? data.slides[0];
 
   const moveMission = (direction: -1 | 1) => {
     setMissionIndex((current) => {
       const next = current + direction;
-      if (next < 0) return missionSlides.length - 1;
-      if (next >= missionSlides.length) return 0;
+      if (next < 0) return data.slides.length - 1;
+      if (next >= data.slides.length) return 0;
       return next;
     });
   };
@@ -55,9 +70,10 @@ export function WhoWeAreSection() {
     <section id="who-we-are" className="bg-white">
       <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.2fr)_minmax(0,0.92fr)]">
         <div className="relative order-2 aspect-[16/10] overflow-hidden sm:aspect-[5/3] lg:order-none lg:aspect-auto lg:min-h-[680px]">
-          <Image
-            src="/assets/real/who-we-are-roundtable.jpg"
-            alt="Faith Associates roundtable with community leaders at Al Manaar"
+          <EditableImage
+            src={data.image}
+            alt={data.imageAlt}
+            path="whoWeAre.image"
             fill
             sizes="(max-width: 1024px) 100vw, 40vw"
             quality={90}
@@ -68,26 +84,20 @@ export function WhoWeAreSection() {
 
         <div className="order-1 flex flex-col justify-center px-6 py-10 text-center sm:px-10 sm:py-14 sm:text-left lg:order-none lg:px-12 lg:py-16 xl:px-16">
           <p className="type-eyebrow text-[var(--blue)]">
-            Who we are
+            <EditableText value={data.eyebrow} path="whoWeAre.eyebrow" />
           </p>
           <h2 className="type-display mx-auto mt-4 max-w-[18ch] text-[clamp(1.75rem,4.8vw,2.85rem)] text-[var(--ink)] sm:mx-0 sm:mt-5 sm:max-w-[16ch]">
-            We work with you to raise standards in faith institutions.
+            <EditableText value={data.title} path="whoWeAre.title" />
           </h2>
           <div className="type-body mx-auto mt-4 max-w-[34rem] space-y-3 text-[0.95rem] text-[var(--muted)] sm:mx-0 sm:mt-7 sm:space-y-4 sm:text-[1rem]">
-            <p>
-              Faith Associates is a specialist consultancy helping mosques, madrassahs and community
-              organisations overcome critical challenges and seize their greatest opportunities.
-            </p>
-            <p className="hidden sm:block">
-              Our work is rooted in deep collaboration across a global network of practitioners dedicated to
-              building capable, resilient and trusted faith institutions every day.
-            </p>
+            <EditableText value={data.body[0] ?? ""} path="whoWeAre.body.0" as="p" multiline />
+            <EditableText value={data.body[1] ?? ""} path="whoWeAre.body.1" as="p" multiline className="hidden sm:block" />
           </div>
           <Link
-            href="/about"
+            href={data.ctaHref}
             className="btn-secondary mt-7 w-full border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--navy)] hover:text-white sm:mt-9 sm:w-fit"
           >
-            More About Us
+            <EditableText value={data.ctaLabel} path="whoWeAre.ctaLabel" />
           </Link>
         </div>
 
@@ -103,21 +113,21 @@ export function WhoWeAreSection() {
 
           <div className="flex flex-col items-center justify-center px-6 py-8 text-center sm:items-start sm:px-10 sm:py-10 sm:text-left lg:px-10 xl:px-12">
             <p className="type-display text-[2.75rem] text-black sm:text-[clamp(3rem,6vw,4.25rem)]">
-              5000+
+              <EditableText value={data.statValue} path="whoWeAre.statValue" />
             </p>
-            <p className="type-meta mt-3 text-black sm:mt-4">Mosques</p>
+            <EditableText value={data.statLabel} path="whoWeAre.statLabel" as="p" className="type-meta mt-3 text-black sm:mt-4" />
             <p className="type-meta mt-1.5 text-[var(--muted)] sm:mt-2">
-              Supported across communities
+              <EditableText value={data.statSublabel} path="whoWeAre.statSublabel" />
             </p>
           </div>
 
           <div className="flex flex-col justify-between px-6 py-8 text-center sm:px-10 sm:py-10 sm:text-left lg:px-10 lg:py-10 xl:px-12">
             <div>
               <h3 className="type-title text-[1.35rem] text-black sm:text-[1.6rem]">
-                {mission.title}
+                <EditableText value={mission.title} path={`whoWeAre.slides.${missionIndex}.title`} />
               </h3>
               <p className="type-body mx-auto mt-3 max-w-[30rem] text-[0.92rem] text-[var(--muted)] sm:mx-0 sm:mt-4 sm:text-[0.95rem]">
-                {mission.body}
+                <EditableText value={mission.body} path={`whoWeAre.slides.${missionIndex}.body`} />
               </p>
             </div>
 

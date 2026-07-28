@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import type { HomeBlocks } from "@/lib/cms/types";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 type Destination = {
   label: string;
@@ -238,7 +241,14 @@ function buildDestinationUrl(href: string, email: string, topic: string) {
   return `${url.pathname}${url.search}`;
 }
 
-export function GuidedSupportSection() {
+export function GuidedSupportSection({ content }: { content?: HomeBlocks["guidedSupport"] }) {
+  const data = content ?? {
+    image: "/assets/real/guided-support-training.jpg",
+    title: "We champion the bold to achieve the extraordinary.",
+    body: "Answer two questions and put our thinking to work on your challenges.",
+    topics,
+  };
+  const activeTopics = data.topics;
   const router = useRouter();
   const emailInputId = useId();
   const [step, setStep] = useState<Step>("topic");
@@ -268,7 +278,7 @@ export function GuidedSupportSection() {
   };
 
   const handleTopicSelectFromPopup = (label: string) => {
-    const topic = topics.find((item) => item.label === label);
+    const topic = activeTopics.find((item) => item.label === label);
     if (!topic) return;
 
     setTopicOpen(false);
@@ -320,7 +330,7 @@ export function GuidedSupportSection() {
     router.push(buildDestinationUrl(pendingHref, trimmed, activeTopic.label));
   };
 
-  const topicOptions = topics.map((topic) => ({
+  const topicOptions = activeTopics.map((topic) => ({
     label: topic.label,
     value: topic.label,
   }));
@@ -343,9 +353,10 @@ export function GuidedSupportSection() {
     <section className="bg-[var(--soft)] py-12 lg:py-20">
       <div className="mx-auto grid max-w-[1280px] gap-8 px-6 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start lg:gap-16 xl:px-8">
         <div className="media-frame relative aspect-[16/10] w-full overflow-hidden sm:aspect-[5/3] lg:aspect-auto lg:h-[520px] lg:max-w-[460px]">
-          <Image
-            src="/assets/real/guided-support-training.jpg"
+          <EditableImage
+            src={data.image}
             alt="Faith Associates trainer delivering a community workshop"
+            path="guidedSupport.image"
             fill
             sizes="(max-width: 1024px) 100vw, 460px"
             quality={90}
@@ -359,11 +370,10 @@ export function GuidedSupportSection() {
             Find the right service
           </p>
           <h2 className="type-display mx-auto max-w-[22ch] text-[clamp(1.7rem,3.2vw,2.65rem)] text-[var(--ink)] md:mx-0">
-            We champion the bold to achieve the extraordinary.
+            <EditableText value={data.title} path="guidedSupport.title" />
           </h2>
           <p className="type-body mx-auto mt-4 max-w-[32rem] text-[0.98rem] text-[var(--muted)] md:mx-0 lg:mt-5 lg:text-[1.05rem]">
-            Answer two questions and put our thinking to work on your
-            challenges.
+            <EditableText value={data.body} path="guidedSupport.body" multiline />
           </p>
 
           <div className="mt-6 pt-2 lg:mt-10 lg:pt-4">
@@ -457,7 +467,7 @@ export function GuidedSupportSection() {
                 {/* Desktop: pill options */}
                 <div className="mt-6 hidden max-w-[680px] flex-wrap gap-x-3.5 gap-y-4 md:flex">
                   {step === "topic"
-                    ? topics.map((topic) => (
+                    ? activeTopics.map((topic) => (
                         <button
                           key={topic.label}
                           type="button"

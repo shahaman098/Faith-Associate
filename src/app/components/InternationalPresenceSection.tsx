@@ -142,7 +142,7 @@ export const internationalRegions: InternationalRegion[] = [
   },
 ];
 
-export function InternationalPresenceSection() {
+export function InternationalPresenceSection({ regions = internationalRegions }: { regions?: InternationalRegion[] }) {
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>("europe");
   const regionRefs = useRef<Record<string, HTMLElement | null>>({});
 
@@ -174,7 +174,7 @@ export function InternationalPresenceSection() {
           </div>
 
           <InternationalMap
-            regions={internationalRegions}
+            regions={regions}
             selectedRegionId={selectedRegionId}
             onSelectRegion={setSelectedRegionId}
           />
@@ -184,7 +184,7 @@ export function InternationalPresenceSection() {
       <section id="regions" className="border-b border-[var(--line)] py-14 lg:py-20">
         <div className="section-shell">
           <div className="grid md:grid-cols-2 lg:grid-cols-3">
-            {internationalRegions.map((region, index) => {
+            {regions.map((region, index) => {
               const selected = region.id === selectedRegionId;
               return (
                 <article

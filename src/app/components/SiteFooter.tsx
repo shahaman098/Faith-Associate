@@ -1,5 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import type { SiteSettingsData } from "@/lib/cms/types";
+import { EditableText } from "./cms/EditableText";
+import { useEdit } from "./cms/EditProvider";
 
 const footerGroups = [
   {
@@ -37,7 +42,16 @@ function ArrowIcon() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ settings }: { settings?: SiteSettingsData | null }) {
+  const { settings: liveSettings } = useEdit();
+  const footer = liveSettings?.footer ?? settings?.footer;
+  const blurb =
+    footer?.blurb ??
+    "Building standards, resilience and leadership across faith institutions and communities worldwide.";
+  const copyright = footer?.copyright ?? "© 2026 Faith Associates";
+  const email = footer?.email ?? "info@faithassociates.co.uk";
+  const phone = footer?.phone ?? "+44 (0) 1494 416202";
+  const phoneTel = phone.replace(/[^\d+]/g, "") || "+441494416202";
   return (
     <footer className="bg-[var(--navy)] text-white">
       <div className="section-shell py-7 sm:py-12 lg:py-16">
@@ -53,8 +67,7 @@ export function SiteFooter() {
               />
             </Link>
             <p className="mt-3 hidden max-w-[22rem] text-sm leading-7 text-white/60 sm:mt-4 sm:block">
-              Building standards, resilience and leadership across faith institutions and communities
-              worldwide.
+              <EditableText value={blurb} path="footer.blurb" scope="settings" as="span" multiline />
             </p>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/48 sm:mt-5 sm:gap-x-5 sm:text-[11px] lg:justify-start">
               <a
@@ -66,12 +79,12 @@ export function SiteFooter() {
                 LinkedIn
               </a>
               <a
-                href="https://www.instagram.com/faithassociates/"
+                href="https://www.facebook.com/FaithAssociates1/"
                 target="_blank"
                 rel="noreferrer"
                 className="transition hover:text-[var(--blue-light)]"
               >
-                Instagram
+                Facebook
               </a>
               <a
                 href="https://x.com/faithassociates"
@@ -125,16 +138,16 @@ export function SiteFooter() {
 
       <div className="border-t border-white/10 bg-[#07131d]">
         <div className="section-shell flex flex-col items-center gap-2 py-4 text-center text-[11px] leading-5 text-white/50 sm:flex-row sm:justify-between sm:gap-3 sm:py-5 sm:text-left sm:text-xs">
-          <p>© 2026 Faith Associates</p>
+          <EditableText value={copyright} path="footer.copyright" scope="settings" as="p" />
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-end sm:gap-x-4">
             <Link href="/privacy" className="transition hover:text-[var(--blue-light)]">
               Privacy
             </Link>
-            <a href="mailto:info@faithassociates.co.uk" className="transition hover:text-[var(--blue-light)]">
-              info@faithassociates.co.uk
+            <a href={`mailto:${email}`} className="transition hover:text-[var(--blue-light)]">
+              <EditableText value={email} path="footer.email" scope="settings" as="span" />
             </a>
-            <a href="tel:+441494416202" className="transition hover:text-[var(--blue-light)]">
-              +44 (0) 1494 416202
+            <a href={`tel:${phoneTel}`} className="transition hover:text-[var(--blue-light)]">
+              <EditableText value={phone} path="footer.phone" scope="settings" as="span" />
             </a>
           </div>
         </div>

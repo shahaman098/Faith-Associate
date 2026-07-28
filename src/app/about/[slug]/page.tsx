@@ -6,6 +6,9 @@ import { EditorialHero } from "../../components/EditorialHero";
 import { SiteFooter } from "../../components/SiteFooter";
 import { SiteHeader } from "../../components/SiteHeader";
 import { history, team } from "../../data/site-content";
+import { CmsPage } from "../../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntries } from "@/lib/cms/queries";
 
 const pages = {
   history: {
@@ -133,19 +136,33 @@ export async function generateMetadata({
 
 export default async function AboutSubpage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = pages[slug as keyof typeof pages];
-  if (!page) notFound();
+  const fallbackPage = pages[slug as keyof typeof pages];
+  if (!fallbackPage) notFound();
+  const { settings, page: cmsPage, preferDraft } = await loadCmsPage(`/about/${slug}`);
+  const blocks = cmsPage?.blocks as Record<string, any> | undefined;
+  const page = { ...fallbackPage, ...(blocks?.hero ?? {}) };
+  const [historyEntries, teamEntries, clientEntries, roleEntries] = await Promise.all([
+    getEntries("history_item", { preferDraft }),
+    getEntries("team_member", { preferDraft }),
+    getEntries("client", { preferDraft }),
+    getEntries("vacancy_role", { preferDraft }),
+  ]);
+  const cmsHistory = historyEntries.length ? (historyEntries.map((entry) => entry.data) as typeof history) : history;
+  const cmsTeam = teamEntries.length ? (teamEntries.map((entry) => entry.data) as typeof team) : team;
+  const cmsClients = clientEntries.length ? (clientEntries.map((entry) => entry.data) as typeof clients) : clients;
+  const cmsRoles = roleEntries.length ? roleEntries.map((entry) => String(entry.data.title ?? entry.slug)) : roles;
 
   return (
+    <CmsPage path={`/about/${slug}`} blocks={cmsPage?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero {...page} />
 
       {slug === "history" ? (
         <section className="py-12 lg:py-20">
           <div className="section-shell max-w-5xl">
             <div className="border-t border-[var(--line)]">
-              {history.map((item, index) => (
+              {cmsHistory.map((item, index) => (
                 <article
                   key={`${item.year}-${item.title}`}
                   className="grid gap-5 border-b border-[var(--line)] py-8 sm:grid-cols-[0.25fr_0.75fr] sm:py-10"
@@ -169,7 +186,7 @@ export default async function AboutSubpage({ params }: { params: Promise<{ slug:
         <section className="py-12 lg:py-20">
           <div className="section-shell">
             <div className="grid md:grid-cols-2 lg:grid-cols-3">
-              {clients.map((client, index) => (
+              {cmsClients.map((client, index) => (
                 <article
                   key={client.name}
                   className="border-b border-[var(--line)] px-0 py-8 md:px-7 md:first:pl-0 lg:border-r [&:nth-child(3n)]:border-r-0"
@@ -197,7 +214,7 @@ export default async function AboutSubpage({ params }: { params: Promise<{ slug:
         <section className="py-12 lg:py-20">
           <div className="section-shell">
             <div className="grid gap-px bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-3">
-              {team.map((person, index) => (
+              {cmsTeam.map((person, index) => (
                 <article key={person.name} className="flex min-h-64 flex-col bg-white p-7 sm:p-9">
                   <p className="capability-index">0{index + 1}</p>
                   {person.image ? (
@@ -267,7 +284,7 @@ export default async function AboutSubpage({ params }: { params: Promise<{ slug:
               </a>
             </div>
             <div className="border-t border-[var(--line)]">
-              {roles.map((role) => (
+              {cmsRoles.map((role) => (
                 <div
                   key={role}
                   className="flex items-center justify-between gap-5 border-b border-[var(--line)] py-5"
@@ -291,7 +308,8 @@ export default async function AboutSubpage({ params }: { params: Promise<{ slug:
           </Link>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

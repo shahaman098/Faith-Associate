@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { EditorialPageData } from "../data/site-content";
+import type { SiteSettingsData } from "@/lib/cms/types";
 import { EditorialHero } from "./EditorialHero";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
@@ -28,6 +29,7 @@ type EditorialDirectoryProps = {
   introBody: string;
   items: EditorialPageData[];
   basePath: "/services" | "/projects";
+  settings?: SiteSettingsData;
 };
 
 export function EditorialDirectory({
@@ -39,10 +41,11 @@ export function EditorialDirectory({
   introBody,
   items,
   basePath,
+  settings,
 }: EditorialDirectoryProps) {
   return (
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
         eyebrow={eyebrow}
         title={title}
@@ -109,7 +112,7 @@ export function EditorialDirectory({
           </Link>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
   );
 }

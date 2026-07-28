@@ -6,6 +6,9 @@ import { SiteFooter } from "../../components/SiteFooter";
 import { SiteHeader } from "../../components/SiteHeader";
 import { ZohoFormEmbed } from "../../components/ZohoFormEmbed";
 import { getPublication, publications } from "../../data/publications";
+import { CmsPage } from "../../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntry } from "@/lib/cms/queries";
 
 export function generateStaticParams() {
   return publications.map(({ slug }) => ({ slug }));
@@ -38,7 +41,9 @@ function ArrowIcon() {
 
 export default async function PublicationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const publication = getPublication(slug);
+  const { settings, page, preferDraft } = await loadCmsPage(`/publications/${slug}`);
+  const entry = await getEntry("publication", slug, { preferDraft });
+  const publication = entry ? ({ slug: entry.slug, ...entry.data } as typeof publications[number]) : getPublication(slug);
   if (!publication) notFound();
 
   const related = publications
@@ -46,8 +51,9 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
     .slice(0, 3);
 
   return (
+    <CmsPage path={`/publications/${slug}`} blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <section className="relative overflow-hidden bg-[var(--navy)] pb-16 pt-40 text-white lg:pb-24 lg:pt-52">
         <div className="section-shell relative grid gap-12 lg:grid-cols-[1.22fr_0.78fr] lg:items-end lg:gap-20">
           <div>
@@ -243,7 +249,8 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

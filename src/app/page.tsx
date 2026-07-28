@@ -9,6 +9,10 @@ import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
 import { WhatWeDoCarousel } from "./components/WhatWeDoCarousel";
 import { WhoWeAreSection } from "./components/WhoWeAreSection";
+import { CmsPage } from "./components/cms/CmsPage";
+import { EditableText } from "./components/cms/EditableText";
+import { getHomeBlocks } from "@/lib/cms/queries";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 const heroStories = [
   { label: "Mosque Security", href: "/projects/mosque-security" },
@@ -112,10 +116,19 @@ const news = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const { settings, preferDraft } = await loadCmsPage("/");
+  const blocks = await getHomeBlocks({ preferDraft });
+  const cmsHeroStories = blocks.hero.stories;
+  const cmsHeroMessages = blocks.hero.messages;
+  const cmsCapabilities = blocks.whatWeDo.capabilities as typeof capabilities;
+  const cmsServices = blocks.servicesCarousel.items as ServiceSlide[];
+  const cmsNews = blocks.newsCarousel.items;
+
   return (
+    <CmsPage path="/" blocks={blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
 
       <section className="relative isolate h-[calc(100svh-76px)] overflow-hidden bg-[var(--navy)] text-white lg:h-[100svh]">
         <video
@@ -124,19 +137,19 @@ export default function Home() {
           loop
           playsInline
           preload="metadata"
-          poster="/assets/real/hero-law-society-poster.jpg"
+          poster={blocks.hero.poster}
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover opacity-80"
         >
-          <source src="/assets/real/hero-law-society.mp4" type="video/mp4" />
+          <source src={blocks.hero.video} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,19,29,0.88)_0%,rgba(7,19,29,0.55)_48%,rgba(7,19,29,0.35)_100%)]" />
         <div className="relative z-10 flex h-full flex-col justify-center px-5 py-0 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-          <RotatingHeroCopy items={heroMessages} align="left" layout="immersive" />
+          <RotatingHeroCopy items={cmsHeroMessages} align="left" layout="immersive" />
 
           <div className="mt-8 hidden items-end justify-between gap-5 pt-4 text-center sm:mt-10 sm:gap-6 lg:absolute lg:inset-x-12 lg:bottom-8 lg:flex lg:text-left xl:inset-x-16 2xl:inset-x-20">
             <div className="grid flex-1 grid-cols-2 gap-x-6 gap-y-4 text-white/54 lg:grid-cols-4 lg:gap-8">
-              {heroStories.map((story) => (
+              {cmsHeroStories.map((story) => (
                 <Link
                   key={story.label}
                   href={story.href}
@@ -162,19 +175,19 @@ export default function Home() {
         <div className="section-shell">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="type-display text-[clamp(1.7rem,3.2vw,2.5rem)] text-[var(--ink)]">
-              What we do
+              <EditableText value={blocks.whatWeDo.title} path="whatWeDo.title" />
             </h2>
             <p className="type-body mt-4 text-[var(--muted)] lg:text-[1.05rem]">
-              Specialist consultancy across governance, security, leadership and international networks.
+              <EditableText value={blocks.whatWeDo.body} path="whatWeDo.body" multiline />
             </p>
           </div>
-          <WhatWeDoCarousel items={capabilities} />
+          <WhatWeDoCarousel items={cmsCapabilities} />
         </div>
       </section>
 
-      <GuidedSupportSection />
+      <GuidedSupportSection content={blocks.guidedSupport} />
 
-      <WhoWeAreSection />
+      <WhoWeAreSection content={blocks.whoWeAre} />
 
       <section id="services" className="bg-white py-12 lg:py-20">
         <div className="section-shell">
@@ -182,14 +195,14 @@ export default function Home() {
             <div>
               <p className="type-eyebrow text-[var(--blue)]">What we deliver</p>
               <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-                Key Strategic Services
+                <EditableText value={blocks.servicesCarousel.title} path="servicesCarousel.title" />
               </h2>
             </div>
             <p className="type-body max-w-md text-[var(--muted)] lg:text-[1.05rem]">
-              Flagship programmes spanning sport, security, leadership and environmental practice.
+              <EditableText value={blocks.servicesCarousel.body} path="servicesCarousel.body" multiline />
             </p>
           </div>
-          <ServicesCarousel items={services} />
+          <ServicesCarousel items={cmsServices} />
         </div>
       </section>
 
@@ -199,7 +212,7 @@ export default function Home() {
             <div>
               <p className="type-eyebrow text-[var(--blue)]">Latest updates</p>
               <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-                From across the network
+                <EditableText value={blocks.newsCarousel.title} path="newsCarousel.title" />
               </h2>
             </div>
             <Link
@@ -218,11 +231,11 @@ export default function Home() {
               </svg>
             </Link>
           </div>
-          <NewsUpdatesCarousel items={news} />
+          <NewsUpdatesCarousel items={cmsNews} />
         </div>
       </section>
 
-      <FeaturedPublications />
+      <FeaturedPublications content={blocks.featuredPublications} />
 
       <section id="contact" className="bg-[var(--soft)] py-12 text-[var(--ink)] lg:py-20">
         <div className="section-shell">
@@ -274,7 +287,8 @@ export default function Home() {
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

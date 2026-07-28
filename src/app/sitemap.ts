@@ -1,3 +1,4 @@
+import { eventPages } from "./data/events";
 import type { MetadataRoute } from "next";
 import { publications } from "./data/publications";
 import { newsItems, projects, services } from "./data/site-content";
@@ -56,6 +57,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(date),
       changeFrequency: "yearly" as const,
       priority: 0.6,
+    })),
+    ...eventPages.map(({ slug }) => ({
+      url: `${baseUrl}/events/${slug}`,
+      lastModified: siteUpdated,
+      changeFrequency: "weekly" as const,
+      priority: 0.75,
     })),
   ];
 }

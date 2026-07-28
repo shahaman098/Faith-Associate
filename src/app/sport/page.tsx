@@ -4,6 +4,8 @@ import Link from "next/link";
 import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
   title: "Inclusivity in Sport | Faith Associates",
@@ -32,15 +34,19 @@ const programmes = [
   },
 ];
 
-export default function SportPage() {
+export default async function SportPage() {
+  const { settings, page } = await loadCmsPage("/sport");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
   return (
+    <CmsPage path="/sport" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
-        eyebrow="Inclusivity in sport"
-        title="Faith and sport: a force for generational change."
-        summary="Working with national sporting bodies to take accessible activity, leadership pathways and lasting opportunity into faith institutions."
-        image="/assets/inclusivity-sport.png"
+        eyebrow={hero?.eyebrow ?? "Inclusivity in sport"}
+        title={hero?.title ?? "Faith and sport: a force for generational change."}
+        summary={hero?.summary ?? "Working with national sporting bodies to take accessible activity, leadership pathways and lasting opportunity into faith institutions."}
+        image={hero?.image ?? "/assets/inclusivity-sport.png"}
         primaryLabel="Explore sport programmes"
         primaryHref="#programmes"
         secondaryLabel="Partner with us"
@@ -119,7 +125,8 @@ export default function SportPage() {
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

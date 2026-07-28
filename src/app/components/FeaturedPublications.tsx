@@ -3,6 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import type { HomeBlocks } from "@/lib/cms/types";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 type Publication = {
   id: string;
@@ -75,7 +78,7 @@ function ArrowIcon() {
   );
 }
 
-function PublicationCard({ publication }: { publication: Publication }) {
+function PublicationCard({ publication, index }: { publication: Publication; index: number }) {
   return (
     <Link
       id={publication.id}
@@ -84,9 +87,10 @@ function PublicationCard({ publication }: { publication: Publication }) {
       aria-label={`Read ${publication.title}`}
     >
       <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden bg-[var(--soft)]">
-        <Image
+        <EditableImage
           src={publication.image}
           alt=""
+          path={`featuredPublications.items.${index}.image`}
           fill
           unoptimized
           sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 25vw"
@@ -96,14 +100,20 @@ function PublicationCard({ publication }: { publication: Publication }) {
 
       <div className="mt-4 flex h-[4.75rem] items-start justify-center text-center sm:mt-5 sm:h-[5.25rem]">
         <h3 className="type-title line-clamp-3 text-[1.05rem] transition duration-300 group-hover:text-[var(--blue)] sm:text-[1.1rem]">
-          {publication.title}
+          <EditableText value={publication.title} path={`featuredPublications.items.${index}.title`} />
         </h3>
       </div>
     </Link>
   );
 }
 
-export function FeaturedPublications() {
+export function FeaturedPublications({ content }: { content?: HomeBlocks["featuredPublications"] }) {
+  const data = content ?? {
+    eyebrow: "Featured publication",
+    title: "Standards, toolkits and reports.",
+    tabs: publicationTabs,
+    items: featuredPublications,
+  };
   const railRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState("all");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -117,11 +127,11 @@ export function FeaturedPublications() {
 
   const visiblePublications = useMemo(() => {
     if (activeTab === "all") {
-      return featuredPublications;
+      return data.items;
     }
 
-    return featuredPublications.filter((publication) => publication.category === activeTab);
-  }, [activeTab]);
+    return data.items.filter((publication) => publication.category === activeTab);
+  }, [activeTab, data.items]);
 
   const syncActiveIndex = useEffectEvent(() => {
     const rail = railRef.current;
@@ -225,9 +235,9 @@ export function FeaturedPublications() {
       <div className="section-shell">
         <div className="mb-8 flex flex-col items-center gap-4 text-center md:mb-10">
           <div>
-            <p className="type-eyebrow text-[var(--blue)]">Featured publication</p>
+            <EditableText value={data.eyebrow} path="featuredPublications.eyebrow" as="p" className="type-eyebrow text-[var(--blue)]" />
             <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-              Standards, toolkits and reports.
+              <EditableText value={data.title} path="featuredPublications.title" />
             </h2>
           </div>
           <Link
@@ -243,7 +253,7 @@ export function FeaturedPublications() {
           role="group"
           aria-label="Filter featured publications by category"
         >
-          {publicationTabs.map((tab) => (
+          {data.tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
@@ -282,7 +292,7 @@ export function FeaturedPublications() {
                   : "sm:translate-y-5 lg:translate-y-8"
               }`}
             >
-              <PublicationCard publication={publication} />
+              <PublicationCard publication={publication} index={index} />
             </div>
           ))}
         </div>

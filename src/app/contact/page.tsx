@@ -4,6 +4,8 @@ import { ContactForm } from "../components/ContactForm";
 import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { CmsPage } from "../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
   title: "Contact | Faith Associates",
@@ -18,15 +20,19 @@ export default async function ContactPage({
 }) {
   const { publication } = await searchParams;
   const requestedPublication = typeof publication === "string" ? publication : undefined;
+  const { settings, page } = await loadCmsPage("/contact");
+  const blocks = page?.blocks as Record<string, any> | undefined;
+  const hero = blocks?.hero;
 
   return (
+    <CmsPage path="/contact" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
-      <SiteHeader />
+      <SiteHeader settings={settings} />
       <EditorialHero
-        eyebrow="Contact"
-        title="Start with the challenge. We will help find the next step."
-        summary="Contact the team about consultancy, training, resources, events or partnership opportunities."
-        image="/assets/real/faith-training-speaker.jpg"
+        eyebrow={hero?.eyebrow ?? "Contact"}
+        title={hero?.title ?? "Start with the challenge. We will help find the next step."}
+        summary={hero?.summary ?? "Contact the team about consultancy, training, resources, events or partnership opportunities."}
+        image={hero?.image ?? "/assets/real/faith-training-speaker.jpg"}
       />
       <section className="py-12 lg:py-20">
         <div className="section-shell grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
@@ -110,7 +116,8 @@ export default async function ContactPage({
           </div>
         </div>
       </section>
-      <SiteFooter />
+      <SiteFooter settings={settings} />
     </main>
+    </CmsPage>
   );
 }

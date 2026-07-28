@@ -4,6 +4,9 @@ import { EditorialDetailPage } from "../../components/EditorialDetailPage";
 import { ServiceCataloguePage } from "../../components/ServiceCataloguePage";
 import { getServiceCatalogue, serviceOfferings } from "../../data/service-catalogues";
 import { getService, services } from "../../data/site-content";
+import { CmsPage } from "../../components/cms/CmsPage";
+import { loadCmsPage } from "@/lib/cms/page-helpers";
+import { getEntry } from "@/lib/cms/queries";
 
 export function generateStaticParams() {
   const categorySlugs = services.map(({ slug }) => ({ slug }));
@@ -25,13 +28,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ServicePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const service = getService(slug);
+  const { settings, page, preferDraft } = await loadCmsPage(`/services/${slug}`);
+  const serviceEntry =
+    (await getEntry("service", slug, { preferDraft })) ??
+    (await getEntry("service_offering", slug, { preferDraft }));
+  const service = serviceEntry ? ({ slug: serviceEntry.slug, ...serviceEntry.data } as typeof services[number]) : getService(slug);
   if (!service) notFound();
 
-  const catalogue = getServiceCatalogue(slug);
+  const catalogueEntry = await getEntry("service_catalogue", slug, { preferDraft });
+  const catalogue = catalogueEntry ? (catalogueEntry.data as ReturnType<typeof getServiceCatalogue>) : getServiceCatalogue(slug);
   if (catalogue) {
-    return <ServiceCataloguePage category={service} catalogue={catalogue} />;
+    return <CmsPage path={`/services/${slug}`} blocks={page?.blocks}><ServiceCataloguePage category={service} catalogue={catalogue} settings={settings} /></CmsPage>;
   }
 
-  return <EditorialDetailPage data={service} />;
+  return <CmsPage path={`/services/${slug}`} blocks={page?.blocks}><EditorialDetailPage data={service} settings={settings} /></CmsPage>;
 }

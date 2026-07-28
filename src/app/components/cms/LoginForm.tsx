@@ -21,7 +21,8 @@ export function LoginForm() {
   return (
     <form action={formAction} className="mx-auto w-full max-w-md space-y-4 rounded-2xl border border-[var(--line)] bg-white p-8 shadow-sm">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--ink)]">CMS login</h1>
+        <p className="type-eyebrow text-[var(--blue)]">Content management</p>
+        <h1 className="mt-3 text-2xl font-semibold text-[var(--ink)]">CMS sign in</h1>
         <p className="mt-2 text-sm text-[var(--muted)]">
           Sign in to edit the Faith Associates website on-page.
         </p>

@@ -5,7 +5,12 @@ import { getEditorSession } from "@/lib/cms/actions";
 import { getSiteSettings } from "@/lib/cms/queries";
 import Link from "next/link";
 
-export default async function LoginPage() {
+export const metadata = {
+  title: "CMS Sign in | Faith Associates",
+  robots: { index: false, follow: false },
+};
+
+export default async function CmsSignInPage() {
   const [session, settings] = await Promise.all([getEditorSession(), getSiteSettings()]);
 
   return (
@@ -14,7 +19,8 @@ export default async function LoginPage() {
       <div className="section-shell flex flex-col items-center py-16 sm:py-24">
         {session ? (
           <div className="w-full max-w-md rounded-2xl border border-[var(--line)] bg-white p-8 text-center shadow-sm">
-            <h1 className="text-2xl font-semibold">Signed in</h1>
+            <p className="type-eyebrow text-[var(--blue)]">Content management</p>
+            <h1 className="mt-3 text-2xl font-semibold">Signed in</h1>
             <p className="mt-2 text-sm text-[var(--muted)]">
               {session.email} ({session.role})
             </p>

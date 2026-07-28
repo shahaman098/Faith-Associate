@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/login", destination: "/cms", permanent: false },
       { source: "/about-us", destination: "/about", permanent: true },
       { source: "/about-us/company-history", destination: "/about/history", permanent: true },
       { source: "/about-us/our-clients", destination: "/about/clients", permanent: true },

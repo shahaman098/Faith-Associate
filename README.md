@@ -12,7 +12,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## On-page CMS
 
-1. Go to [/login](http://localhost:3000/login)
+1. Go to [/cms](http://localhost:3000/cms) (production: https://faith-associates.vercel.app/cms)
 2. Sign in as an editor
 3. Use the floating **Edit page** toolbar on any route
 4. Click outlined text/images to change them, then **Save draft** or **Publish**

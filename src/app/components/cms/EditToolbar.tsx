@@ -53,8 +53,8 @@ export function EditToolbar() {
           </button>
         </>
       ) : null}
-      <Link href="/login" className="rounded-full px-2 py-1.5 text-xs text-white/60 hover:text-white">
-        Account
+      <Link href="/cms" className="rounded-full px-2 py-1.5 text-xs text-white/60 hover:text-white">
+        CMS
       </Link>
       <button
         type="button"

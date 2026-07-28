@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useEdit } from "./EditProvider";
 
 type Props = {
@@ -19,6 +19,14 @@ type Props = {
   scope?: "page" | "settings";
 };
 
+function getByPath(root: Record<string, unknown> | null, path: string): unknown {
+  if (!root) return undefined;
+  return path.split(".").reduce<unknown>((cursor, key) => {
+    if (cursor == null || typeof cursor !== "object") return undefined;
+    return (cursor as Record<string, unknown>)[key];
+  }, root);
+}
+
 export function EditableImage({
   src,
   alt,
@@ -33,70 +41,114 @@ export function EditableImage({
   unoptimized,
   scope = "page",
 }: Props) {
-  const { editing, setPageField, setSettingsField, uploadImage } = useEdit();
+  const {
+    editing,
+    pageBlocks,
+    settings,
+    setPageField,
+    setSettingsField,
+    uploadImage,
+  } = useEdit();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [localPreview, setLocalPreview] = useState<string | null>(null);
+
+  const liveValue =
+    scope === "settings"
+      ? getByPath(settings as unknown as Record<string, unknown> | null, path)
+      : getByPath(pageBlocks, path);
+  const displaySrc =
+    localPreview ||
+    (typeof liveValue === "string" && liveValue.length > 0 ? liveValue : src);
+  const shouldUnoptimize =
+    unoptimized ||
+    displaySrc.startsWith("blob:") ||
+    displaySrc.includes("supabase.co/storage");
 
   const onPick = async (file: File | undefined) => {
     if (!file) return;
-    const url = await uploadImage(file);
-    if (!url) return;
-    if (scope === "settings") setSettingsField(path, url);
-    else setPageField(path, url);
+    const preview = URL.createObjectURL(file);
+    setLocalPreview(preview);
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      if (!url) throw new Error("Upload returned no URL");
+      if (scope === "settings") setSettingsField(path, url);
+      else setPageField(path, url);
+      setLocalPreview(url);
+    } catch (error) {
+      setLocalPreview(null);
+      window.alert(error instanceof Error ? error.message : "Image upload failed");
+    } finally {
+      setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
   };
 
-  if (!editing) {
-    if (fill) {
-      return (
-        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} quality={quality} unoptimized={unoptimized} className={className} />
-      );
-    }
-    return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width ?? 800}
-        height={height ?? 600}
-        sizes={sizes}
-        priority={priority}
-        quality={quality}
-        unoptimized={unoptimized}
-        className={className}
-      />
-    );
-  }
+  const image = fill ? (
+    <Image
+      src={displaySrc}
+      alt={alt}
+      fill
+      sizes={sizes}
+      priority={priority}
+      quality={quality}
+      unoptimized={shouldUnoptimize}
+      className={className}
+    />
+  ) : (
+    <Image
+      src={displaySrc}
+      alt={alt}
+      width={width ?? 800}
+      height={height ?? 600}
+      sizes={sizes}
+      priority={priority}
+      quality={quality}
+      unoptimized={shouldUnoptimize}
+      className={className}
+    />
+  );
+
+  if (!editing) return image;
 
   return (
-    <button
-      type="button"
-      className="relative block w-full cursor-pointer overflow-hidden outline outline-2 outline-offset-2 outline-[var(--blue)]/60"
-      onClick={() => inputRef.current?.click()}
-      aria-label={`Replace image: ${alt}`}
+    <span
+      role="button"
+      tabIndex={0}
+      className={
+        fill
+          ? "absolute inset-0 z-20 block cursor-pointer outline outline-2 outline-offset-[-2px] outline-[var(--blue)]/70"
+          : "relative inline-block w-full cursor-pointer outline outline-2 outline-offset-2 outline-[var(--blue)]/70"
+      }
+      aria-label={`Replace image: ${alt || path}`}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!uploading) inputRef.current?.click();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          if (!uploading) inputRef.current?.click();
+        }
+      }}
     >
-      {fill ? (
-        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} quality={quality} unoptimized={unoptimized} className={className} />
-      ) : (
-        <Image
-          src={src}
-          alt={alt}
-          width={width ?? 800}
-          height={height ?? 600}
-          sizes={sizes}
-          priority={priority}
-          quality={quality}
-          unoptimized={unoptimized}
-          className={className}
-        />
-      )}
-      <span className="absolute inset-x-0 bottom-0 bg-black/65 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-white">
-        Click to replace image
+      {image}
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-30 bg-black/70 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-white">
+        {uploading ? "Uploading…" : "Click to replace image"}
       </span>
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,video/mp4,application/pdf"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         className="hidden"
-        onChange={(event) => onPick(event.target.files?.[0])}
+        onChange={(event) => {
+          event.stopPropagation();
+          void onPick(event.target.files?.[0]);
+        }}
       />
-    </button>
+    </span>
   );
 }

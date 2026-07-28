@@ -10,6 +10,7 @@ import { SiteHeader } from "./components/SiteHeader";
 import { WhatWeDoCarousel } from "./components/WhatWeDoCarousel";
 import { WhoWeAreSection } from "./components/WhoWeAreSection";
 import { CmsPage } from "./components/cms/CmsPage";
+import { EditableHeroMedia } from "./components/cms/EditableHeroMedia";
 import { EditableText } from "./components/cms/EditableText";
 import { getHomeBlocks } from "@/lib/cms/queries";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
@@ -131,19 +132,8 @@ export default async function Home() {
       <SiteHeader settings={settings} />
 
       <section className="relative isolate h-[calc(100svh-76px)] overflow-hidden bg-[var(--navy)] text-white lg:h-[100svh]">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={blocks.hero.poster}
-          aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover opacity-80"
-        >
-          <source src={blocks.hero.video} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(7,19,29,0.88)_0%,rgba(7,19,29,0.55)_48%,rgba(7,19,29,0.35)_100%)]" />
+        <EditableHeroMedia video={blocks.hero.video} poster={blocks.hero.poster} />
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(115deg,rgba(7,19,29,0.88)_0%,rgba(7,19,29,0.55)_48%,rgba(7,19,29,0.35)_100%)]" />
         <div className="relative z-10 flex h-full flex-col justify-center px-5 py-0 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <RotatingHeroCopy items={cmsHeroMessages} align="left" layout="immersive" />
 

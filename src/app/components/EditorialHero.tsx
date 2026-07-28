@@ -1,11 +1,18 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 type EditorialHeroProps = {
   eyebrow: string;
   title: string;
   summary: string;
   image: string;
+  imagePath?: string;
+  eyebrowPath?: string;
+  titlePath?: string;
+  summaryPath?: string;
   primaryLabel?: string;
   primaryHref?: string;
   secondaryLabel?: string;
@@ -53,6 +60,10 @@ export function EditorialHero({
   title,
   summary,
   image,
+  imagePath = "hero.image",
+  eyebrowPath = "hero.eyebrow",
+  titlePath = "hero.title",
+  summaryPath = "hero.summary",
   primaryLabel,
   primaryHref,
   secondaryLabel,
@@ -60,22 +71,37 @@ export function EditorialHero({
 }: EditorialHeroProps) {
   return (
     <section className="relative isolate min-h-[560px] overflow-hidden bg-[var(--navy)] text-white lg:min-h-[660px]">
-      <Image src={image} alt="" fill priority loading="eager" sizes="100vw" className="object-cover opacity-58" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,14,24,0.96)_0%,rgba(5,14,24,0.86)_42%,rgba(5,14,24,0.28)_78%,rgba(5,14,24,0.18)_100%)]" />
-      <div className="section-shell relative flex min-h-[560px] items-end pb-14 pt-44 lg:min-h-[660px] lg:pb-20 lg:pt-52">
+      <EditableImage
+        src={image}
+        alt=""
+        path={imagePath}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover opacity-58"
+      />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(90deg,rgba(5,14,24,0.96)_0%,rgba(5,14,24,0.86)_42%,rgba(5,14,24,0.28)_78%,rgba(5,14,24,0.18)_100%)]" />
+      <div className="section-shell relative z-10 flex min-h-[560px] items-end pb-14 pt-44 lg:min-h-[660px] lg:pb-20 lg:pt-52">
         <div className="max-w-4xl">
-          <p className="type-eyebrow text-white/62">{eyebrow}</p>
+          <p className="type-eyebrow text-white/62">
+            <EditableText value={eyebrow} path={eyebrowPath} />
+          </p>
           <h1 className="type-display mt-5 max-w-[16ch] text-[clamp(2.5rem,5.5vw,4.75rem)] text-white">
-            {title}
+            <EditableText value={title} path={titlePath} />
           </h1>
-          <p className="type-body mt-6 max-w-2xl text-base text-white/76 sm:text-lg">{summary}</p>
+          <p className="type-body mt-6 max-w-2xl text-base text-white/76 sm:text-lg">
+            <EditableText value={summary} path={summaryPath} multiline />
+          </p>
           {(primaryLabel && primaryHref) || (secondaryLabel && secondaryHref) ? (
             <div className="mt-8 flex flex-wrap gap-3">
               {primaryLabel && primaryHref ? (
                 <PrimaryCta href={primaryHref} label={primaryLabel} />
               ) : null}
               {secondaryLabel && secondaryHref ? (
-                <Link href={secondaryHref} className="btn-secondary border-white text-white hover:bg-white hover:text-[var(--navy)]">
+                <Link
+                  href={secondaryHref}
+                  className="btn-secondary border-white text-white hover:bg-white hover:text-[var(--navy)]"
+                >
                   {secondaryLabel}
                 </Link>
               ) : null}

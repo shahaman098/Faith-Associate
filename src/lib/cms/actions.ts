@@ -214,28 +214,40 @@ export async function createEntry(
 export async function uploadMedia(formData: FormData) {
   const { supabase, user } = await requireEditor();
   const file = formData.get("file");
-  if (!(file instanceof File)) throw new Error("No file provided");
+  if (!(file instanceof Blob) || file.size === 0) {
+    throw new Error("No file provided");
+  }
 
-  const ext = file.name.split(".").pop() || "bin";
+  const originalName = file instanceof File ? file.name : "upload.bin";
+  const ext = originalName.includes(".")
+    ? originalName.split(".").pop() || "bin"
+    : file.type === "video/mp4"
+      ? "mp4"
+      : "bin";
   const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+  const contentType = file.type || "application/octet-stream";
 
   const { error: uploadError } = await supabase.storage
     .from("media")
-    .upload(path, buffer, { contentType: file.type, upsert: false });
+    .upload(path, buffer, { contentType, upsert: false });
   if (uploadError) throw new Error(uploadError.message);
 
   const {
     data: { publicUrl },
   } = supabase.storage.from("media").getPublicUrl(path);
 
-  await supabase.from("media").insert({
+  const { error: mediaError } = await supabase.from("media").insert({
     path,
-    alt: (formData.get("alt") as string) || file.name,
-    mime: file.type,
+    alt: String(formData.get("alt") || originalName),
+    mime: contentType,
     size_bytes: file.size,
     created_by: user.id,
   });
+  if (mediaError) {
+    // Upload succeeded; metadata insert is best-effort
+    console.error("media metadata insert failed", mediaError.message);
+  }
 
   return { ok: true, url: publicUrl, path };
 }

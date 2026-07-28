@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useEffectEvent, useRef, useState } from "react";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 export type ServiceIcon = "sport" | "security" | "leadership" | "environment";
 
@@ -269,9 +270,10 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
                 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--blue)]
               `}
             >
-              <Image
+              <EditableImage
                 src={service.image}
                 alt=""
+                path={`servicesCarousel.items.${index}.image`}
                 fill
                 sizes="(max-width: 640px) 72vw, (max-width: 1024px) 50vw, 25vw"
                 className="object-cover object-[center_22%] transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
@@ -293,7 +295,7 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
 
                 <div>
                   <h3 className="type-title text-[1.15rem] leading-snug text-white sm:text-[1.25rem]">
-                    {service.title}
+                    <EditableText value={service.title} path={`servicesCarousel.items.${index}.title`} />
                   </h3>
                   <span className="type-cta mt-3 inline-flex items-center gap-2 text-white/70 transition duration-300 group-hover:text-[var(--blue-light)]">
                     Explore

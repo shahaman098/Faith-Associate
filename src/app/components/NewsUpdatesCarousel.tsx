@@ -1,8 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useEffectEvent, useRef, useState } from "react";
+import { EditableImage } from "./cms/EditableImage";
+import { EditableText } from "./cms/EditableText";
 
 export type NewsUpdateItem = {
   title: string;
@@ -131,7 +132,7 @@ export function NewsUpdatesCarousel({ items }: NewsUpdatesCarouselProps) {
         }
       }}
     >
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Link
           key={item.title}
           href={item.href}
@@ -139,18 +140,21 @@ export function NewsUpdatesCarousel({ items }: NewsUpdatesCarouselProps) {
           className="group flex min-h-full w-[calc(100vw-2.75rem)] shrink-0 snap-center flex-col md:min-w-0 md:w-auto md:shrink md:snap-none"
         >
           <div className="media-frame relative aspect-[16/10]">
-            <Image
+            <EditableImage
               src={item.image}
               alt=""
+              path={`newsCarousel.items.${index}.image`}
               fill
               sizes="(max-width: 768px) 85vw, 33vw"
               className="media-zoom object-cover"
             />
           </div>
           <div className="flex flex-1 flex-col pt-5 text-left">
-            <p className="type-meta text-[var(--blue)]">{item.meta}</p>
+            <p className="type-meta text-[var(--blue)]">
+              <EditableText value={item.meta} path={`newsCarousel.items.${index}.meta`} />
+            </p>
             <h3 className="type-title mt-2.5 text-[1.125rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)] md:text-[1.2rem]">
-              {item.title}
+              <EditableText value={item.title} path={`newsCarousel.items.${index}.title`} />
             </h3>
           </div>
         </Link>

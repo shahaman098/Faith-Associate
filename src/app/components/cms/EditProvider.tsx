@@ -181,8 +181,17 @@ export function EditProvider({
   const uploadImage = useCallback(async (file: File) => {
     const formData = new FormData();
     formData.set("file", file);
-    const result = await uploadMedia(formData);
-    return result.url;
+    formData.set("alt", file.name);
+    try {
+      const result = await uploadMedia(formData);
+      setMessage("Image uploaded — save draft or publish");
+      setDirty(true);
+      return result.url;
+    } catch (error) {
+      const text = error instanceof Error ? error.message : "Upload failed";
+      setMessage(text);
+      throw error;
+    }
   }, []);
 
   const value = useMemo<EditContextValue>(

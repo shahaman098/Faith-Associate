@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ContactForm } from "./components/ContactForm";
 import { FeaturedPublications } from "./components/FeaturedPublications";
@@ -172,6 +173,76 @@ export default async function Home() {
             </p>
           </div>
           <WhatWeDoCarousel items={cmsCapabilities} />
+        </div>
+      </section>
+
+      <section className="bg-[#020b19] py-10 text-white sm:py-12 lg:py-14">
+        <div className="section-shell">
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">
+            <div>
+              <p className="type-eyebrow text-[#00d1c2]">Interest registration open</p>
+              <h2 className="type-display mt-3 max-w-2xl text-[clamp(2.25rem,4vw,3.625rem)] uppercase text-white">
+                Mosque &amp; Madrassah Hackathon
+              </h2>
+              <p className="type-body mt-5 max-w-2xl text-[1.05rem] text-white/85">
+                A three-day build bringing teams together to shape practical digital tools for mosques, madrassahs,
+                Islamic charities, scholars, and community institutions.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2.5">
+                <span className="border border-[#00d1c2]/60 bg-[#00d1c2]/10 px-3 py-2 text-sm font-bold uppercase">
+                  27-29 November
+                </span>
+                <span className="border border-[#00d1c2]/60 bg-[#00d1c2]/10 px-3 py-2 text-sm font-bold uppercase">
+                  London
+                </span>
+              </div>
+              <ul className="mt-6 grid gap-2.5 text-[0.95rem] text-white/85">
+                <li className="border-l-[3px] border-[#00d1c2] pl-3">
+                  <strong className="text-white">Day 1:</strong> Kickoff
+                </li>
+                <li className="border-l-[3px] border-[#00d1c2] pl-3">
+                  <strong className="text-white">Day 2:</strong> Build &amp; Mentor Sessions
+                </li>
+                <li className="border-l-[3px] border-[#00d1c2] pl-3">
+                  <strong className="text-white">Day 3:</strong> Demo Day &amp; Awards
+                </li>
+              </ul>
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <a
+                  href="https://luma.com/bgovi683"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center bg-[#00d1c2] px-5 py-3 text-sm font-bold uppercase text-[#001423] transition duration-300 hover:bg-white"
+                >
+                  Register interest
+                </a>
+                <a
+                  href="https://mosqueexpo.com/hackathon/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="type-cta text-white underline underline-offset-4 transition duration-300 hover:text-[#00d1c2]"
+                >
+                  View hackathon page
+                </a>
+              </div>
+            </div>
+
+            <a
+              href="https://luma.com/bgovi683"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Register interest for Mosque and Madrassah Hackathon"
+              className="block border border-white/20 bg-white/5 p-2.5 transition duration-300 hover:border-[#00d1c2]"
+            >
+              <Image
+                src="/assets/mosque-madrassah-hackathon-official-banner.png"
+                alt="Mosque and Madrassah Hackathon official banner, 27 to 29 November in London"
+                width={560}
+                height={560}
+                className="h-auto w-full"
+              />
+            </a>
+          </div>
         </div>
       </section>
 

@@ -47,3 +47,10 @@ scripts/seed-sql/
 scripts/seed-batches/
 scripts/seed-json-chunks/
 scripts/seed-rpc/
+
+# generated WordPress comparison HTML dumps
+docs/rendered-all-services-content/
+docs/rendered-all-services-content-v2/
+docs/rendered-all-services-content-v3/
+docs/rendered-proposed-service-content-v2/
+docs/rendered-service-comparison/

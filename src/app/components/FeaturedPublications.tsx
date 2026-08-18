@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import type { HomeBlocks } from "@/lib/cms/types";
 import { EditableImage } from "./cms/EditableImage";
 import { EditableText } from "./cms/EditableText";
+import { useEdit } from "./cms/EditProvider";
 
 type Publication = {
   id: string;
@@ -79,6 +79,44 @@ function ArrowIcon() {
 }
 
 function PublicationCard({ publication, index }: { publication: Publication; index: number }) {
+  const { editing } = useEdit();
+
+  const body = (
+    <>
+      <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden bg-[var(--soft)]">
+        <EditableImage
+          src={publication.image}
+          alt={publication.title || "Publication cover"}
+          path={`featuredPublications.items.${index}.image`}
+          positionPath={`featuredPublications.items.${index}.imagePosition`}
+          fill
+          unoptimized
+          sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 25vw"
+          defaultPosition="50% 50%"
+          className="object-contain transition duration-500 group-hover:scale-[1.03]"
+        />
+      </div>
+
+      <div
+        className={`mt-4 flex h-[4.75rem] items-start justify-center text-center sm:mt-5 sm:h-[5.25rem] ${
+          editing ? "pointer-events-none" : ""
+        }`}
+      >
+        <h3 className="type-title line-clamp-3 text-[1.05rem] transition duration-300 group-hover:text-[var(--blue)] sm:text-[1.1rem]">
+          <EditableText value={publication.title} path={`featuredPublications.items.${index}.title`} />
+        </h3>
+      </div>
+    </>
+  );
+
+  if (editing) {
+    return (
+      <div id={publication.id} className="group flex h-full w-full scroll-mt-28 flex-col">
+        {body}
+      </div>
+    );
+  }
+
   return (
     <Link
       id={publication.id}
@@ -86,23 +124,7 @@ function PublicationCard({ publication, index }: { publication: Publication; ind
       className="group flex h-full w-full scroll-mt-28 flex-col"
       aria-label={`Read ${publication.title}`}
     >
-      <div className="relative aspect-[3/4] w-full shrink-0 overflow-hidden bg-[var(--soft)]">
-        <EditableImage
-          src={publication.image}
-          alt=""
-          path={`featuredPublications.items.${index}.image`}
-          fill
-          unoptimized
-          sizes="(max-width: 640px) 78vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-contain object-center transition duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-
-      <div className="mt-4 flex h-[4.75rem] items-start justify-center text-center sm:mt-5 sm:h-[5.25rem]">
-        <h3 className="type-title line-clamp-3 text-[1.05rem] transition duration-300 group-hover:text-[var(--blue)] sm:text-[1.1rem]">
-          <EditableText value={publication.title} path={`featuredPublications.items.${index}.title`} />
-        </h3>
-      </div>
+      {body}
     </Link>
   );
 }

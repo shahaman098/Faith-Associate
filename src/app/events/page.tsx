@@ -3,7 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
+import { ProofCtaBand } from "../components/ProofCtaBand";
 import { SiteHeader } from "../components/SiteHeader";
+import { ArrowIcon, CalendarIcon } from "../components/icons";
+import { EditableText } from "../components/cms/EditableText";
 import { eventPages } from "../data/events";
 import { CmsPage } from "../components/cms/CmsPage";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
@@ -17,8 +20,21 @@ export const metadata: Metadata = {
 
 export default async function EventsPage() {
   const { settings, page, preferDraft } = await loadCmsPage("/events");
-  const blocks = page?.blocks as Record<string, any> | undefined;
-  const hero = blocks?.hero;
+  const blocks = page?.blocks as Record<string, unknown> | undefined;
+  const eventBlocks = blocks as
+    | Partial<{
+        hero: { eyebrow: string; title: string; summary: string; image: string };
+        cta: { eyebrow: string; title: string; label: string };
+      }>
+    | undefined;
+  const hero = blocks?.hero as
+    | Partial<{
+        eyebrow: string;
+        title: string;
+        summary: string;
+        image: string;
+      }>
+    | undefined;
   const entries = await getEntries("event", { preferDraft });
   const events = entries.length ? (entries.map((entry) => ({ slug: entry.slug, ...entry.data })) as typeof eventPages) : eventPages;
   return (
@@ -30,66 +46,91 @@ export default async function EventsPage() {
         title={hero?.title ?? "Events built around practical action."}
         summary={hero?.summary ?? "Current Faith Associates events, conferences and briefings that help leaders, teachers and institutions respond to real operational challenges."}
         image={hero?.image ?? events[0]?.heroImage ?? "/assets/real/mosque-expo-2024-hall.jpg"}
-        primaryLabel="Explore the event"
-        primaryHref="#events"
+        primaryLabel="Enquire"
+        primaryHref="/contact"
+        secondaryLabel="See the programme"
+        secondaryHref="#events"
       />
-      <section id="events" className="scroll-mt-6 py-12 lg:py-20">
+      <section id="events" className="band band-white scroll-mt-24">
         <div className="section-shell">
-          <div className="mx-auto max-w-4xl">
-            {events.map((event) => (
-              <Link
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-end lg:gap-16">
+            <div>
+              <p className="type-eyebrow text-[var(--blue)]">
+                <EditableText value="Event schedule" path="eventsLabel" />
+              </p>
+              <h2 className="type-display mt-4 max-w-[16ch] text-[clamp(1.85rem,3.4vw,2.8rem)] text-[var(--ink)]">
+                What is coming up.
+              </h2>
+              <div className="rule-red mt-6" />
+            </div>
+            <p className="type-body max-w-[40rem] text-[1.02rem] text-[var(--muted)] lg:text-[1.1rem]">
+              Conferences, briefings and convenings that bring mosque leaders, teachers, statutory
+              partners and specialists into the same room to work on live operational problems.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-px bg-[var(--line)]">
+            {events.map((event, index) => (
+              <article
                 key={event.slug}
-                href={`/events/${event.slug}`}
-                className="group grid gap-8 rounded-[2rem] border border-[var(--line)] bg-white p-5 shadow-[0_24px_70px_rgba(8,20,31,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_28px_85px_rgba(8,20,31,0.12)] md:grid-cols-[1.05fr_0.95fr] md:p-7"
+                className="group relative grid gap-8 bg-white p-6 md:grid-cols-[0.85fr_1.15fr] md:p-8 lg:gap-12"
               >
-                <div className="media-frame relative aspect-[1.08/1] overflow-hidden rounded-[1.35rem]">
+                <div className="media-frame relative aspect-[1.08/1] w-full overflow-hidden">
                   <Image
                     src={event.posterImage}
                     alt={event.posterAlt}
                     fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                    sizes="(max-width: 768px) 100vw, 40vw"
                     className="media-zoom object-cover"
                   />
+                  <span className="absolute left-0 top-0 flex size-12 items-center justify-center bg-[var(--navy)] text-[13px] font-semibold tracking-[0.08em] text-white sm:size-14">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
+
                 <div className="flex flex-col justify-center">
-                  <p className="type-meta text-[var(--blue)]">
-                    {event.category} / {event.date}
-                  </p>
-                  <h2 className="type-title mt-4 text-[1.6rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)] sm:text-[1.85rem]">
-                    {event.title}
-                  </h2>
-                  <p className="type-body mt-4 text-sm text-[var(--muted)] sm:text-base">
+                  <div className="flex items-center gap-4">
+                    <span className="icon-tile">
+                      <CalendarIcon />
+                    </span>
+                    <p className="type-meta text-[var(--blue)]">
+                      {event.category} / {event.date}
+                    </p>
+                  </div>
+                  <h3 className="type-title mt-5 text-[1.6rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)] sm:text-[2rem]">
+                    <Link href={`/events/${event.slug}`}>
+                      <span className="absolute inset-0" aria-hidden="true" />
+                      {event.title}
+                    </Link>
+                  </h3>
+                  <p className="type-body mt-4 max-w-[42rem] text-[1rem] text-[var(--muted)]">
                     {event.cardSummary}
                   </p>
-                  <dl className="mt-6 grid gap-4 border-t border-[var(--line)] pt-6 sm:grid-cols-2">
-                    <div>
-                      <dt className="type-meta text-[var(--blue)]">Location</dt>
-                      <dd className="type-body mt-2 text-sm text-[var(--ink)]">{event.location}</dd>
-                    </div>
-                    <div>
-                      <dt className="type-meta text-[var(--blue)]">Time</dt>
-                      <dd className="type-body mt-2 text-sm text-[var(--ink)]">{event.time}</dd>
-                    </div>
-                  </dl>
+
+                  <div className="chip-row mt-7">
+                    <span className="chip">{event.location}</span>
+                    <span className="chip">{event.time}</span>
+                    <span className="chip chip--accent">Registration open</span>
+                  </div>
+
+                  <span className="type-cta relative z-10 mt-8 inline-flex items-center gap-2 text-[var(--blue)]">
+                    View the event <ArrowIcon />
+                  </span>
                 </div>
-              </Link>
+              </article>
             ))}
           </div>
         </div>
       </section>
-      <section className="bg-[var(--soft)] py-12 lg:py-20">
-        <div className="section-shell flex flex-col gap-6 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-          <div>
-            <p className="type-eyebrow text-[var(--blue)]">Bring an event to your network</p>
-            <h2 className="type-display mt-3 text-[clamp(1.75rem,3.2vw,2.5rem)] text-[var(--ink)]">
-              Talk to our events and programmes team.
-            </h2>
-          </div>
-          <Link href="/contact" className="btn-primary self-center sm:self-auto">
-            Start a conversation →
-          </Link>
-        </div>
-      </section>
+
+      <ProofCtaBand
+        eyebrow={eventBlocks?.cta?.eyebrow ?? "Bring an event to your network"}
+        title={eventBlocks?.cta?.title ?? "Talk to our events and programmes team."}
+        primaryLabel={eventBlocks?.cta?.label ?? "Start a conversation"}
+        secondaryLabel="Latest news"
+        secondaryHref="/news"
+      />
+
       <SiteFooter settings={settings} />
     </main>
     </CmsPage>

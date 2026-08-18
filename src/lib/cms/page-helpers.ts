@@ -1,19 +1,18 @@
-import { getEditorSession } from "./actions";
 import { getPage, getSiteSettings } from "./queries";
 
 export async function loadCmsPage(path: string) {
-  const session = await getEditorSession();
-  const preferDraft = Boolean(session);
+  // Public pages should serve published content only so they can stay cacheable.
+  const preferDraft = false;
   const [settings, page] = await Promise.all([
-    getSiteSettings({ preferDraft }),
-    getPage(path, { preferDraft }),
+    getSiteSettings(),
+    getPage(path),
   ]);
 
   return {
-    session,
+    session: null,
     settings,
     page,
-    isEditor: Boolean(session),
+    isEditor: false,
     preferDraft,
   };
 }

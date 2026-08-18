@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { publicationCategories, publications } from "../data/publications";
+import type { Publication, PublicationCategory } from "../data/publications";
 
 function ArrowIcon() {
   return (
@@ -32,13 +32,26 @@ function SearchIcon() {
   );
 }
 
-export function PublicationExplorer() {
-  const [category, setCategory] = useState<(typeof publicationCategories)[number]>("All");
+type PublicationExplorerProps = {
+  items: Publication[];
+};
+
+export function PublicationExplorer({ items }: PublicationExplorerProps) {
+  const categories = useMemo<Array<"All" | PublicationCategory>>(
+    () => [
+      "All",
+      ...Array.from(
+        new Set(items.map((publication) => publication.category)),
+      ).sort(),
+    ],
+    [items],
+  );
+  const [category, setCategory] = useState<"All" | PublicationCategory>("All");
   const [query, setQuery] = useState("");
 
   const visible = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return publications.filter((publication) => {
+    return items.filter((publication) => {
       const categoryMatches = category === "All" || publication.category === category;
       const queryMatches =
         !normalizedQuery ||
@@ -47,7 +60,7 @@ export function PublicationExplorer() {
           .includes(normalizedQuery);
       return categoryMatches && queryMatches;
     });
-  }, [category, query]);
+  }, [category, items, query]);
 
   return (
     <section className="py-12 lg:py-20">
@@ -55,7 +68,7 @@ export function PublicationExplorer() {
         <div className="sticky top-0 z-20 -mx-3 border-b border-[var(--line)] bg-white/96 px-3 py-4 backdrop-blur lg:top-0">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex gap-0 overflow-x-auto" role="group" aria-label="Filter by publication category">
-              {publicationCategories.map((item) => (
+              {categories.map((item) => (
                 <button
                   key={item}
                   type="button"

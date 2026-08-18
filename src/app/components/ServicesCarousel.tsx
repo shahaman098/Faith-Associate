@@ -4,6 +4,8 @@ import Link from "next/link";
 import { startTransition, useEffect, useEffectEvent, useRef, useState } from "react";
 import { EditableImage } from "./cms/EditableImage";
 import { EditableText } from "./cms/EditableText";
+import { useEdit } from "./cms/EditProvider";
+import { ArrowIcon } from "./icons";
 
 export type ServiceIcon = "sport" | "security" | "leadership" | "environment";
 
@@ -20,7 +22,6 @@ type ServicesCarouselProps = {
 
 function ServiceIconMark({ type }: { type: ServiceIcon }) {
   const common = {
-    className: "size-7 sm:size-8",
     viewBox: "0 0 32 32",
     fill: "none",
     "aria-hidden": true as const,
@@ -105,6 +106,7 @@ function ServiceIconMark({ type }: { type: ServiceIcon }) {
 }
 
 export function ServicesCarousel({ items }: ServicesCarouselProps) {
+  const { editing } = useEdit();
   const rootRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -253,13 +255,7 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
             ? "translate-y-0 opacity-100"
             : "translate-y-6 opacity-0";
 
-          return (
-            <Link
-              key={service.title}
-              href={service.href}
-              data-service-slide="true"
-              style={{ transitionDelay: visible ? `${index * 80}ms` : "0ms" }}
-              className={`
+          const cardClassName = `
                 group relative isolate flex aspect-[3/4] w-[calc(100vw-2.75rem)] shrink-0 snap-center
                 flex-col justify-end overflow-hidden bg-[var(--navy)]
                 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
@@ -268,46 +264,47 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
                 ${reveal}
                 focus-visible:z-10 focus-visible:outline focus-visible:outline-2
                 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--blue)]
-              `}
-            >
+              `;
+
+          const cardBody = (
+            <>
               <EditableImage
                 src={service.image}
-                alt=""
+                alt={service.title || "Service image"}
                 path={`servicesCarousel.items.${index}.image`}
+                positionPath={`servicesCarousel.items.${index}.imagePosition`}
                 fill
                 sizes="(max-width: 640px) 72vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-cover object-[center_22%] transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+                defaultPosition="center 22%"
+                className="object-cover transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
               />
 
-              {/* Mask baked-in artwork + build a modern caption plane */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(7,19,29,0.08)_0%,rgba(7,19,29,0.2)_38%,rgba(7,19,29,0.82)_72%,rgba(7,19,29,0.96)_100%)] transition duration-500 group-hover:bg-[linear-gradient(180deg,rgba(7,19,29,0.12)_0%,rgba(7,19,29,0.28)_34%,rgba(7,19,29,0.88)_70%,rgba(7,19,29,0.98)_100%)]"
               />
 
-              <div className="relative z-10 flex flex-col gap-4 p-5 sm:gap-5 sm:p-6 lg:p-7">
+              <div
+                className={`relative z-10 flex flex-col gap-4 p-5 sm:gap-5 sm:p-6 lg:p-7 ${
+                  editing ? "pointer-events-none" : ""
+                }`}
+              >
                 <div className="flex items-start justify-between gap-3">
-                  <span className="inline-flex size-11 items-center justify-center bg-white/10 text-white ring-1 ring-inset ring-white/30 backdrop-blur-sm transition duration-300 group-hover:bg-[var(--blue)] group-hover:ring-[var(--blue-light)] sm:size-12">
+                  <span className="icon-tile icon-tile--ghost transition duration-300 group-hover:border-[var(--blue)] group-hover:bg-[var(--blue)]">
                     <ServiceIconMark type={service.icon} />
                   </span>
-                  <span className="type-meta text-white/45">0{index + 1}</span>
+                  <span className="index-number index-number--on-navy" aria-hidden="true">
+                    0{index + 1}
+                  </span>
                 </div>
 
                 <div>
-                  <h3 className="type-title text-[1.15rem] leading-snug text-white sm:text-[1.25rem]">
+                  <h3 className="type-title text-[1.3rem] leading-snug text-white sm:text-[1.45rem]">
                     <EditableText value={service.title} path={`servicesCarousel.items.${index}.title`} />
                   </h3>
-                  <span className="type-cta mt-3 inline-flex items-center gap-2 text-white/70 transition duration-300 group-hover:text-[var(--blue-light)]">
+                  <span className="type-cta mt-3 inline-flex items-center gap-2 text-white/78 transition duration-300 group-hover:text-[var(--blue-light)]">
                     Explore
-                    <svg className="size-3.5 transition duration-300 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path
-                        d="M3 8h9M8.5 4.5 12.5 8 8.5 11.5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <ArrowIcon className="size-4 transition duration-300 group-hover:translate-x-0.5" />
                   </span>
                 </div>
               </div>
@@ -316,6 +313,31 @@ export function ServicesCarousel({ items }: ServicesCarouselProps) {
                 aria-hidden="true"
                 className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-[var(--red)] transition duration-500 ease-out group-hover:scale-x-100 group-focus-visible:scale-x-100"
               />
+            </>
+          );
+
+          if (editing) {
+            return (
+              <div
+                key={service.title}
+                data-service-slide="true"
+                style={{ transitionDelay: visible ? `${index * 80}ms` : "0ms" }}
+                className={cardClassName}
+              >
+                {cardBody}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={service.title}
+              href={service.href}
+              data-service-slide="true"
+              style={{ transitionDelay: visible ? `${index * 80}ms` : "0ms" }}
+              className={cardClassName}
+            >
+              {cardBody}
             </Link>
           );
         })}

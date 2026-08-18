@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Source_Sans_3 } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { SkipLink } from "./components/SkipLink";
 import { CmsShell } from "./components/cms/CmsShell";
-import { getEditorSession } from "@/lib/cms/actions";
 import { getSiteSettings } from "@/lib/cms/queries";
 import "./globals.css";
 
-const sourceSans = Source_Sans_3({
-  variable: "--font-source-sans",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -60,17 +60,16 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getEditorSession();
-  const settings = await getSiteSettings({ preferDraft: Boolean(session) });
+  const settings = await getSiteSettings();
   return (
     <html
       lang="en"
-      className={`${sourceSans.variable} h-full antialiased`}
+      className={`${poppins.variable} h-full antialiased`}
       data-scroll-behavior="smooth"
     >
-      <body className={`${sourceSans.className} flex min-h-full flex-col font-sans antialiased`}>
+      <body className={`${poppins.className} flex min-h-full flex-col font-sans antialiased`}>
         <SkipLink />
-        <CmsShell isEditor={Boolean(session)} email={session?.email} settings={settings}>
+        <CmsShell isEditor={false} settings={settings}>
           {children}
         </CmsShell>
       </body>

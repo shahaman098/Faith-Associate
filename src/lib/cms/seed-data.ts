@@ -1,4 +1,5 @@
 import { eventPages as events } from "@/app/data/events";
+import { guidedSupportContent } from "@/app/data/guided-support";
 import { publications } from "@/app/data/publications";
 import { serviceCatalogues, serviceOfferings } from "@/app/data/service-catalogues";
 import { history, newsItems, projects, services, team } from "@/app/data/site-content";
@@ -98,12 +99,13 @@ const settings: SiteSettingsData = {
     social,
     groups: [
       {
-        title: "What we do",
+        title: "Services",
         links: [
+          ["All services", "/services"],
           ["Mosque services", "/services/mosque-services"],
           ["Safeguarding", "/services/safeguarding"],
-          ["Protective security", "/projects/mosque-security"],
-          ["International", "/international"],
+          ["Safety", "/services/safety"],
+          ["Strategic services", "/services/strategic-services"],
         ],
       },
       {
@@ -112,7 +114,13 @@ const settings: SiteSettingsData = {
           ["About us", "/about"],
           ["Projects", "/projects"],
           ["Publications", "/publications"],
-          ["News", "/news"],
+          ["International", "/international"],
+        ],
+      },
+      {
+        title: "News & events",
+        links: [
+          ["Latest news", "/news"],
           ["Events", "/events"],
         ],
       },
@@ -151,23 +159,7 @@ const homeBlocks: HomeBlocks = {
       { title: "Global Networks", body: "International convening, research and knowledge sharing across faith institution leadership networks.", icon: "networks" },
     ],
   },
-  guidedSupport: {
-    image: "/assets/real/guided-support-training.jpg",
-    title: "We champion the bold to achieve the extraordinary.",
-    body: "Answer two questions and put our thinking to work on your challenges.",
-    topics: [
-      { label: "Mosque Governance", destinations: [["Mosque services & governance", "/services/mosque-services"], ["Policies & procedures", "/services/mosque-policy-and-procedure-development"], ["Election management", "/services/mosque-election-management"]].map(([label, href]) => ({ label, href })) },
-      { label: "Madrassah Support", destinations: [{ label: "Madrassah support", href: "/services/madrassah-support" }] },
-      { label: "Leadership Training", destinations: [{ label: "Faith Associates Academy", href: "/projects/faith-associates-academy" }] },
-      { label: "Safeguarding", destinations: [{ label: "Safeguarding services", href: "/services/safeguarding" }, { label: "Online & offline safety", href: "/services/safety" }] },
-      { label: "Imam Services", destinations: [{ label: "Imam services", href: "/services/imam-services" }] },
-      { label: "Security & Safety", destinations: [{ label: "Security risk assessment", href: "/services/mosque-security-risk-assessment" }, { label: "Safety support", href: "/services/safety" }, { label: "Mosque Security programme", href: "/projects/mosque-security" }] },
-      { label: "Strategic Projects", destinations: [{ label: "Strategic services", href: "/services/strategic-services" }, { label: "All projects", href: "/projects" }] },
-      { label: "International Work", destinations: [{ label: "International work", href: "/international" }] },
-      { label: "Publications", destinations: [{ label: "Publications", href: "/publications" }] },
-      { label: "Events & Networks", destinations: [{ label: "Events", href: "/events" }, { label: "Mosque Expo", href: "/projects/mosque-expo" }, { label: "Beacon Mosque Awards", href: "/projects/british-beacon-mosque-awards" }] },
-    ],
-  },
+  guidedSupport: guidedSupportContent,
   whoWeAre: {
     eyebrow: "Who we are",
     title: "We work with you to raise standards in faith institutions.",
@@ -177,11 +169,18 @@ const homeBlocks: HomeBlocks = {
     ],
     image: "/assets/real/who-we-are-roundtable.jpg",
     imageAlt: "Faith Associates roundtable with community leaders at Al Manaar",
-    ctaLabel: "More About Us",
+    ctaLabel: "More about us",
     ctaHref: "/about",
+    secondaryCtaLabel: "Our history since 2004",
+    secondaryCtaHref: "/about/history",
     statValue: "5000+",
     statLabel: "Mosques",
     statSublabel: "Supported across communities",
+    stats: [
+      { value: "5000+", label: "Mosques supported" },
+      { value: "3467+", label: "Madrassahs engaged" },
+      { value: "20+", label: "Years of impact" },
+    ],
     slides: [
       { title: "Our Mission.", body: "We help faith institutions turn complexity into capability by combining specialist knowledge, partnership working and grounded sector understanding." },
       { title: "Our Approach.", body: "We work alongside mosque, madrassah and charity leaders with practical frameworks that strengthen governance, safeguarding, security and community impact." },
@@ -306,7 +305,11 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-const withoutSlug = <T extends { slug: string }>({ slug: _slug, ...data }: T) => data;
+const withoutSlug = <T extends { slug: string }>(item: T) => {
+  const { slug, ...data } = item;
+  void slug;
+  return data;
+};
 
 const records = <T extends { slug: string }>(type: string, items: T[]): EntryRecord[] =>
   items.map((item, sort_order) => ({

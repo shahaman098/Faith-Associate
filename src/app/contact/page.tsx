@@ -5,6 +5,7 @@ import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
 import { CmsPage } from "../components/cms/CmsPage";
+import { EditableText } from "../components/cms/EditableText";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
@@ -21,8 +22,27 @@ export default async function ContactPage({
   const { publication } = await searchParams;
   const requestedPublication = typeof publication === "string" ? publication : undefined;
   const { settings, page } = await loadCmsPage("/contact");
-  const blocks = page?.blocks as Record<string, any> | undefined;
-  const hero = blocks?.hero;
+  const blocks = page?.blocks as Record<string, unknown> | undefined;
+  const contactBlocks = blocks as
+    | Partial<{
+        hero: { eyebrow: string; title: string; summary: string; image: string };
+        addressLines: string[];
+        telephone: string;
+        email: string;
+        hours: string;
+        publicationHint: string;
+        linksTitle: string;
+        links: string[][];
+      }>
+    | undefined;
+  const hero = blocks?.hero as
+    | Partial<{
+        eyebrow: string;
+        title: string;
+        summary: string;
+        image: string;
+      }>
+    | undefined;
 
   return (
     <CmsPage path="/contact" blocks={page?.blocks}>
@@ -33,42 +53,51 @@ export default async function ContactPage({
         title={hero?.title ?? "Start with the challenge. We will help find the next step."}
         summary={hero?.summary ?? "Contact the team about consultancy, training, resources, events or partnership opportunities."}
         image={hero?.image ?? "/assets/real/faith-training-speaker.jpg"}
+        primaryLabel="Send an enquiry"
+        primaryHref="#enquiry-form"
+        secondaryLabel="Browse services"
+        secondaryHref="/services"
       />
-      <section className="py-12 lg:py-20">
+      <section id="enquiry-form" className="band band-white scroll-mt-24">
         <div className="section-shell grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
           <div>
-            <p className="type-eyebrow text-[var(--blue)]">Get in touch</p>
+            <p className="type-eyebrow text-[var(--blue)]">
+              <EditableText value="Get in touch" path="contactLabel" />
+            </p>
             <h2 className="type-display mt-4 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-              Faith Associates
+              <EditableText value={contactBlocks?.addressLines?.[0] ?? "Faith Associates"} path="addressLines.0" />
               <br />
-              41 Baker Street
+              <EditableText value={contactBlocks?.addressLines?.[1] ?? "41 Baker Street"} path="addressLines.1" />
               <br />
-              High Wycombe
+              <EditableText value={contactBlocks?.addressLines?.[2] ?? "High Wycombe"} path="addressLines.2" />
               <br />
-              HP11 2RZ
+              <EditableText value={contactBlocks?.addressLines?.[3] ?? "HP11 2RZ"} path="addressLines.3" />
             </h2>
-            <div className="type-body mt-9 grid gap-5 border-t border-[var(--line)] pt-7 text-sm text-[var(--muted)]">
+            <div className="rule-red mt-6" />
+            <div className="type-body mt-9 grid gap-6 border-t border-[var(--line)] pt-7 text-[0.95rem] text-[var(--muted)]">
               <div>
-                <p className="type-meta text-[var(--ink)]">Telephone</p>
+                <p className="type-meta text-[var(--blue)]">Telephone</p>
                 <a
-                  href="tel:+441494416202"
-                  className="mt-1 inline-block underline decoration-[var(--blue)] underline-offset-4"
+                  href={`tel:${(contactBlocks?.telephone ?? "+44 (0) 1494 416202").replace(/[^\d+]/g, "")}`}
+                  className="type-title mt-1.5 inline-block text-[1.15rem] text-[var(--ink)] transition hover:text-[var(--blue)]"
                 >
-                  +44 (0) 1494 416202
+                  <EditableText value={contactBlocks?.telephone ?? "+44 (0) 1494 416202"} path="telephone" />
                 </a>
               </div>
               <div>
-                <p className="type-meta text-[var(--ink)]">Email</p>
+                <p className="type-meta text-[var(--blue)]">Email</p>
                 <a
-                  href="mailto:info@faithassociates.co.uk"
-                  className="mt-1 inline-block underline decoration-[var(--blue)] underline-offset-4"
+                  href={`mailto:${contactBlocks?.email ?? "info@faithassociates.co.uk"}`}
+                  className="type-title mt-1.5 inline-block text-[1.15rem] text-[var(--ink)] transition hover:text-[var(--blue)]"
                 >
-                  info@faithassociates.co.uk
+                  <EditableText value={contactBlocks?.email ?? "info@faithassociates.co.uk"} path="email" />
                 </a>
               </div>
               <div>
-                <p className="type-meta text-[var(--ink)]">Office hours</p>
-                <p className="mt-1">9:30–18:00, Monday to Friday</p>
+                <p className="type-meta text-[var(--blue)]">Office hours</p>
+                <p className="mt-1">
+                  <EditableText value={contactBlocks?.hours ?? "9:30–18:00, Monday to Friday"} path="hours" />
+                </p>
               </div>
             </div>
 
@@ -82,36 +111,51 @@ export default async function ContactPage({
               </div>
             ) : (
               <p className="type-body mt-8 text-xs text-[var(--muted)]">
-                For publication requests, include the publication title in your message so the team
-                can respond quickly.
+                <EditableText
+                  value={contactBlocks?.publicationHint ?? "For publication requests, include the publication title in your message so the team can respond quickly."}
+                  path="publicationHint"
+                  multiline
+                />
               </p>
             )}
           </div>
 
-          <ContactForm publicationTitle={requestedPublication} />
+          <div className="panel-frame w-full">
+            <div className="panel-frame__head">
+              <p className="type-eyebrow text-[var(--blue)]">Enquiry form</p>
+              <p className="type-title mt-2 text-[1.25rem] text-[var(--ink)]">
+                Tell us about your institution
+              </p>
+            </div>
+            <div className="panel-frame__body">
+              <ContactForm publicationTitle={requestedPublication} />
+            </div>
+          </div>
         </div>
       </section>
-      <section className="bg-[var(--soft)] py-10 lg:py-12">
+      <section className="band-tight band-soft">
         <div className="section-shell flex flex-wrap items-center justify-between gap-5 text-sm">
-          <p className="type-title text-[1.05rem] text-[var(--ink)]">Looking for a specific service?</p>
+          <p className="type-title text-[1.25rem] text-[var(--ink)]">
+            <EditableText value="Looking for a specific service?" path="linksTitle" />
+          </p>
           <div className="flex flex-wrap gap-5">
             <Link
               href="/services"
-              className="type-cta text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+              className="type-cta inline-flex items-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
             >
-              Browse services
+              <EditableText value={contactBlocks?.links?.[0]?.[0] ?? "Browse services"} path="links.0.0" />
             </Link>
             <Link
               href="/projects"
-              className="type-cta text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+              className="type-cta inline-flex items-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
             >
-              View projects
+              <EditableText value={contactBlocks?.links?.[1]?.[0] ?? "View projects"} path="links.1.0" />
             </Link>
             <Link
               href="/publications"
-              className="type-cta text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+              className="type-cta inline-flex items-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
             >
-              Find a publication
+              <EditableText value={contactBlocks?.links?.[2]?.[0] ?? "Find a publication"} path="links.2.0" />
             </Link>
           </div>
         </div>

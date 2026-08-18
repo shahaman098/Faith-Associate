@@ -1,6 +1,7 @@
 import { eventPages } from "./data/events";
 import type { MetadataRoute } from "next";
 import { publications } from "./data/publications";
+import { serviceOfferings } from "./data/service-catalogues";
 import { newsItems, projects, services } from "./data/site-content";
 
 const baseUrl = "https://faithassociates.co.uk";
@@ -34,12 +35,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency,
       priority,
     })),
-    ...services.map(({ slug }) => ({
-      url: `${baseUrl}/services/${slug}`,
-      lastModified: siteUpdated,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    })),
+    ...[...services, ...serviceOfferings]
+      .filter(({ slug }, index, all) => all.findIndex((item) => item.slug === slug) === index)
+      .map(({ slug }) => ({
+        url: `${baseUrl}/services/${slug}`,
+        lastModified: siteUpdated,
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      })),
     ...projects.map(({ slug }) => ({
       url: `${baseUrl}/projects/${slug}`,
       lastModified: siteUpdated,

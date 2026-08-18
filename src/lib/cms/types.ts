@@ -46,6 +46,7 @@ export type HomeBlocks = {
   hero: {
     video: string;
     poster: string;
+    posterPosition?: string;
     messages: {
       eyebrow: string;
       title: string;
@@ -62,45 +63,60 @@ export type HomeBlocks = {
   };
   guidedSupport: {
     image: string;
+    imagePosition?: string;
     title: string;
     body: string;
-    topics: { label: string; destinations: { label: string; href: string }[] }[];
+    topics: {
+      label: string;
+      /** Primary destination. Guided support links straight through — no refine step. */
+      href?: string;
+      summary?: string;
+      icon?: string;
+      /** Secondary routes in the same family, rendered as direct links on the card. */
+      destinations: { label: string; href: string }[];
+    }[];
   };
   whoWeAre: {
     eyebrow: string;
     title: string;
     body: string[];
     image: string;
+    imagePosition?: string;
     imageAlt: string;
     ctaLabel: string;
     ctaHref: string;
     statValue: string;
     statLabel: string;
     statSublabel: string;
+    /** Proof row. Falls back to the single statValue/statLabel pair when absent. */
+    stats?: { value: string; label: string }[];
+    secondaryCtaLabel?: string;
+    secondaryCtaHref?: string;
     slides: { title: string; body: string }[];
   };
   servicesCarousel: {
     eyebrow: string;
     title: string;
     body: string;
-    items: { title: string; image: string; href: string; icon: string }[];
+    items: { title: string; image: string; imagePosition?: string; href: string; icon: string }[];
   };
   newsCarousel: {
     eyebrow: string;
     title: string;
-    items: { title: string; image: string; meta: string; href: string }[];
+    items: { title: string; image: string; imagePosition?: string; meta: string; href: string }[];
   };
   featuredPublications: {
     eyebrow: string;
     title: string;
     tabs: { id: string; label: string }[];
-    items: {
+      items: {
       id: string;
       category: string;
       type: string;
       date: string;
       title: string;
       image: string;
+      imagePosition?: string;
       href: string;
     }[];
   };

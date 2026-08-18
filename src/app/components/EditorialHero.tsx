@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { EditableImage } from "./cms/EditableImage";
 import { EditableText } from "./cms/EditableText";
+import { ArrowIcon } from "./icons";
 
 type EditorialHeroProps = {
   eyebrow: string;
@@ -17,21 +18,12 @@ type EditorialHeroProps = {
   primaryHref?: string;
   secondaryLabel?: string;
   secondaryHref?: string;
+  /** Metadata chips under the summary — duration, cost, status. */
+  chips?: string[];
+  /** Optional third link, e.g. an outbound partner site. */
+  tertiaryLabel?: string;
+  tertiaryHref?: string;
 };
-
-function ArrowIcon() {
-  return (
-    <svg aria-hidden="true" className="size-4" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3 8h9M8.5 3.5 13 8l-4.5 4.5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
-}
 
 function PrimaryCta({
   href,
@@ -68,6 +60,9 @@ export function EditorialHero({
   primaryHref,
   secondaryLabel,
   secondaryHref,
+  chips,
+  tertiaryLabel,
+  tertiaryHref,
 }: EditorialHeroProps) {
   return (
     <section className="relative isolate min-h-[560px] overflow-hidden bg-[var(--navy)] text-white lg:min-h-[660px]">
@@ -89,10 +84,19 @@ export function EditorialHero({
           <h1 className="type-display mt-5 max-w-[16ch] text-[clamp(2.5rem,5.5vw,4.75rem)] text-white">
             <EditableText value={title} path={titlePath} />
           </h1>
-          <p className="type-body mt-6 max-w-2xl text-base text-white/76 sm:text-lg">
+          <p className="type-body mt-6 max-w-2xl text-base text-white/80 sm:text-lg">
             <EditableText value={summary} path={summaryPath} multiline />
           </p>
-          {(primaryLabel && primaryHref) || (secondaryLabel && secondaryHref) ? (
+          {chips?.length ? (
+            <div className="chip-row mt-7">
+              {chips.map((chip) => (
+                <span key={chip} className="chip chip--on-navy">
+                  {chip}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {(primaryLabel && primaryHref) || (secondaryLabel && secondaryHref) || (tertiaryLabel && tertiaryHref) ? (
             <div className="mt-8 flex flex-wrap gap-3">
               {primaryLabel && primaryHref ? (
                 <PrimaryCta href={primaryHref} label={primaryLabel} />
@@ -104,6 +108,17 @@ export function EditorialHero({
                 >
                   {secondaryLabel}
                 </Link>
+              ) : null}
+              {tertiaryLabel && tertiaryHref ? (
+                <a
+                  href={tertiaryHref}
+                  target={tertiaryHref.startsWith("http") ? "_blank" : undefined}
+                  rel={tertiaryHref.startsWith("http") ? "noreferrer" : undefined}
+                  className="btn-secondary border-white/45 text-white hover:bg-white hover:text-[var(--navy)]"
+                >
+                  {tertiaryLabel}
+                  <ArrowIcon />
+                </a>
               ) : null}
             </div>
           ) : null}

@@ -20,6 +20,28 @@ export type Publication = PublicationSource & {
   isLegacy: boolean;
   downloadUrl?: string;
   zohoFormUrl?: string;
+  legacyNoticeTitle: string;
+  legacyNoticeBody: string;
+  accessEyebrow: string;
+  downloadCtaLabel: string;
+  requestCtaLabel: string;
+  publishedBy: string;
+  resourceTypeLabel: string;
+  catalogueYearLabel: string;
+  overviewEyebrow: string;
+  overviewTitle: string;
+  overviewBody: string;
+  requestEyebrow: string;
+  requestTitle: string;
+  requestBody: string;
+  usageEyebrow: string;
+  usageSteps: string[];
+  implementationTitle: string;
+  implementationBody: string;
+  implementationCtaLabel: string;
+  relatedEyebrow: string;
+  relatedTitle: string;
+  relatedCtaLabel: string;
 };
 
 const publicationSources: PublicationSource[] = [
@@ -205,6 +227,36 @@ export const publications: Publication[] = publicationSources
       downloadUrl: downloadUrls[item.slug],
       zohoFormUrl: zohoFormUrls[item.slug],
       summary: item.summary || getFallbackSummary(category, item.title),
+      legacyNoticeTitle: "Archived operational guidance.",
+      legacyNoticeBody:
+        "This resource is preserved for historical reference and may not reflect current public-health, legal or regulatory requirements.",
+      accessEyebrow: "Access the resource",
+      downloadCtaLabel: "Download publication",
+      requestCtaLabel: "Request this publication",
+      publishedBy: "Published by Faith Associates",
+      resourceTypeLabel: "Resource type",
+      catalogueYearLabel: "Catalogue year",
+      overviewEyebrow: "Overview",
+      overviewTitle: "Guidance grounded in sector experience.",
+      overviewBody:
+        "Faith Associates develops publications from direct work with faith institutions, leadership teams and delivery partners. The aim is to turn field learning into practical material that can inform discussion, planning and implementation.",
+      requestEyebrow: "Request this publication",
+      requestTitle: "Complete the form below.",
+      requestBody:
+        "Register your details to receive this publication from Faith Associates.",
+      usageEyebrow: "Using this publication",
+      usageSteps: [
+        "Review the resource with the people responsible for governance or delivery in your institution.",
+        "Adapt recommendations to your context, legal duties, risk profile and available capacity.",
+        "Turn agreed actions into named responsibilities, timescales and a clear review point.",
+      ],
+      implementationTitle: "Need help implementing it?",
+      implementationBody:
+        "The Faith Associates team can support training, review, policy development and implementation linked to this area of work.",
+      implementationCtaLabel: "Talk to the team",
+      relatedEyebrow: "Continue reading",
+      relatedTitle: "Related publications",
+      relatedCtaLabel: "View library",
     };
   })
   .sort((a, b) => b.updated.localeCompare(a.updated));

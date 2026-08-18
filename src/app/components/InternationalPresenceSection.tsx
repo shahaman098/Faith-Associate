@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { InternationalMap, type InternationalRegion } from "./InternationalMap";
+import { EditableText } from "./cms/EditableText";
 
 export const internationalRegions: InternationalRegion[] = [
   {
@@ -163,13 +164,18 @@ export function InternationalPresenceSection({ regions = internationalRegions }:
       <section className="border-b border-[var(--line)] bg-white py-14 lg:py-20">
         <div className="section-shell">
           <div className="mb-8 max-w-3xl lg:mb-10">
-            <p className="type-eyebrow text-[var(--blue)]">Where we work</p>
+            <p className="type-eyebrow text-[var(--blue)]">
+              <EditableText value="Where we work" path="mapEyebrow" />
+            </p>
             <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-              An interactive view of our international presence.
+              <EditableText value="An interactive view of our international presence." path="mapTitle" />
             </h2>
             <p className="type-body mt-4 text-[var(--muted)] lg:text-[1.05rem]">
-              Select a highlighted country or region to explore partnerships across Africa, Europe,
-              the Nordic states, the Middle East, North America and Australasia.
+              <EditableText
+                value="Select a highlighted country or region to explore partnerships across Africa, Europe, the Nordic states, the Middle East, North America and Australasia."
+                path="mapBody"
+                multiline
+              />
             </p>
           </div>
 
@@ -203,8 +209,12 @@ export function InternationalPresenceSection({ regions = internationalRegions }:
                     className="w-full cursor-pointer text-left"
                   >
                     <p className="type-meta text-[var(--blue)]">0{index + 1}</p>
-                    <h2 className="type-title mt-5 text-2xl text-[var(--ink)]">{region.name}</h2>
-                    <p className="type-body mt-4 text-sm text-[var(--muted)]">{region.body}</p>
+                    <h2 className="type-title mt-5 text-2xl text-[var(--ink)]">
+                      <EditableText value={region.name} path={`regions.${index}.name`} />
+                    </h2>
+                    <p className="type-body mt-4 text-sm text-[var(--muted)]">
+                      <EditableText value={region.body} path={`regions.${index}.body`} multiline />
+                    </p>
                   </button>
                 </article>
               );

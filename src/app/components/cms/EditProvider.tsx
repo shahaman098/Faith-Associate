@@ -4,25 +4,29 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
   type ReactNode,
 } from "react";
 import {
   logoutAction,
+  publishEntry,
   publishPage,
   publishSiteSettings,
+  saveEntryDraft,
   savePageDraft,
   saveSiteSettingsDraft,
   uploadMedia,
 } from "@/lib/cms/actions";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import type { HomeBlocks, SiteSettingsData } from "@/lib/cms/types";
 
 type CmsDocument =
-  | { kind: "page"; path: string; blocks: Record<string, unknown> }
-  | { kind: "settings"; data: SiteSettingsData }
-  | { kind: "entry"; type: string; slug: string; data: Record<string, unknown> };
+  | { kind: "page"; path: string; blocks: Record<string, unknown> | null }
+  | { kind: "entry"; type: string; slug: string; data: Record<string, unknown> | null };
 
 type EditContextValue = {
   isEditor: boolean;
@@ -34,10 +38,14 @@ type EditContextValue = {
   email: string | null;
   pagePath: string | null;
   pageBlocks: Record<string, unknown> | null;
+  documentKind: "page" | "entry" | null;
+  entryType: string | null;
+  entrySlug: string | null;
   settings: SiteSettingsData | null;
   setPageField: (path: string, value: unknown) => void;
   setSettingsField: (path: string, value: unknown) => void;
   registerPage: (path: string, blocks: Record<string, unknown> | null) => void;
+  registerEntry: (type: string, slug: string, data: Record<string, unknown> | null) => void;
   saveDraft: () => void;
   publish: () => void;
   logout: () => void;
@@ -46,55 +54,20 @@ type EditContextValue = {
 
 const EditContext = createContext<EditContextValue | null>(null);
 
-function setByPath(obj: Record<string, unknown>, path: string, value: unknown) {
-  const parts = path.split(".");
-  const next = structuredClone(obj);
-  let cursor: Record<string, unknown> = next;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const key = parts[i]!;
-    const index = Number(key);
-    if (Array.isArray(cursor[parts[i - 1] as string])) {
-      // handled below via object traversal
-    }
-    const part = parts[i]!;
-    const asIndex = /^\d+$/.test(part);
-    if (asIndex) {
-      const arr = cursor as unknown as unknown[];
-      const idx = Number(part);
-      if (typeof arr[idx] !== "object" || arr[idx] === null) {
-        arr[idx] = {};
-      }
-      cursor = arr[idx] as Record<string, unknown>;
-      continue;
-    }
-    if (typeof cursor[part] !== "object" || cursor[part] === null) {
-      const nextPart = parts[i + 1];
-      cursor[part] = nextPart && /^\d+$/.test(nextPart) ? [] : {};
-    }
-    cursor = cursor[part] as Record<string, unknown>;
-  }
-  const last = parts[parts.length - 1]!;
-  if (/^\d+$/.test(last) && Array.isArray(cursor)) {
-    (cursor as unknown as unknown[])[Number(last)] = value;
-  } else {
-    cursor[last] = value;
-  }
-  return next;
-}
-
 function setPathValue(root: Record<string, unknown>, path: string, value: unknown) {
   const parts = path.split(".");
   const clone = structuredClone(root);
-  let current: any = clone;
+  let current: Record<string, unknown> | unknown[] = clone;
   for (let i = 0; i < parts.length - 1; i++) {
     const key = parts[i]!;
     const nextKey = parts[i + 1]!;
-    if (current[key] == null) {
-      current[key] = /^\d+$/.test(nextKey) ? [] : {};
+    const bucket = current as Record<string, unknown>;
+    if (bucket[key] == null) {
+      bucket[key] = /^\d+$/.test(nextKey) ? [] : {};
     }
-    current = current[key];
+    current = bucket[key] as Record<string, unknown> | unknown[];
   }
-  current[parts[parts.length - 1]!] = value;
+  (current as Record<string, unknown>)[parts[parts.length - 1]!] = value;
   return clone as Record<string, unknown>;
 }
 
@@ -113,27 +86,105 @@ export function EditProvider({
   initialPagePath?: string | null;
   initialPageBlocks?: Record<string, unknown> | null;
 }) {
+  const [editorState, setEditorState] = useState({
+    isEditor,
+    email: email ?? null,
+  });
   const [editing, setEditing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [settings, setSettings] = useState<SiteSettingsData | null>(initialSettings ?? null);
-  const [pagePath, setPagePath] = useState<string | null>(initialPagePath ?? null);
-  const [pageBlocks, setPageBlocks] = useState<Record<string, unknown> | null>(
-    initialPageBlocks ?? null,
+  const [document, setDocument] = useState<CmsDocument | null>(
+    initialPagePath ? { kind: "page", path: initialPagePath, blocks: initialPageBlocks ?? null } : null,
   );
   const [isPending, startTransition] = useTransition();
+  const dirtyRef = useRef(false);
+
+  useEffect(() => {
+    dirtyRef.current = dirty;
+  }, [dirty]);
+
+  useEffect(() => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseAnonKey) return;
+
+    const client = createBrowserClient();
+    let cancelled = false;
+
+    async function syncEditorState() {
+      const {
+        data: { user },
+      } = await client.auth.getUser();
+
+      if (!user) {
+        if (!cancelled) setEditorState({ isEditor: false, email: null });
+        return;
+      }
+
+      const { data: profile } = await client
+        .from("profiles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      setEditorState({
+        isEditor: Boolean(profile && ["editor", "admin"].includes(profile.role)),
+        email: user.email ?? null,
+      });
+    }
+
+    void syncEditorState();
+
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange(() => {
+      void syncEditorState();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const registerPage = useCallback((path: string, blocks: Record<string, unknown> | null) => {
-    setPagePath(path);
-    setPageBlocks(blocks);
-    setDirty(false);
+    setDocument((current) => {
+      if (current?.kind === "page" && current.path === path && dirtyRef.current) {
+        return current;
+      }
+      setDirty(false);
+      return { kind: "page", path, blocks };
+    });
+  }, []);
+
+  const registerEntry = useCallback((type: string, slug: string, data: Record<string, unknown> | null) => {
+    setDocument((current) => {
+      if (
+        current?.kind === "entry" &&
+        current.type === type &&
+        current.slug === slug &&
+        dirtyRef.current
+      ) {
+        return current;
+      }
+      setDirty(false);
+      return { kind: "entry", type, slug, data };
+    });
   }, []);
 
   const setPageField = useCallback((path: string, value: unknown) => {
-    setPageBlocks((prev) => {
-      if (!prev) return prev;
+    setDocument((prev) => {
       setDirty(true);
-      return setPathValue(prev, path, value);
+      if (prev?.kind === "page") {
+        return { ...prev, blocks: setPathValue(prev.blocks ?? {}, path, value) };
+      }
+      if (prev?.kind === "entry") {
+        return { ...prev, data: setPathValue(prev.data ?? {}, path, value) };
+      }
+      return { kind: "page", path: "/", blocks: setPathValue({}, path, value) };
     });
   }, []);
 
@@ -149,27 +200,37 @@ export function EditProvider({
     startTransition(async () => {
       try {
         if (settings) await saveSiteSettingsDraft(settings);
-        if (pagePath && pageBlocks) await savePageDraft(pagePath, pageBlocks);
+        if (document?.kind === "page" && document.path && document.blocks) {
+          await savePageDraft(document.path, document.blocks);
+        }
+        if (document?.kind === "entry" && document.type && document.slug && document.data) {
+          await saveEntryDraft(document.type, document.slug, document.data);
+        }
         setDirty(false);
         setMessage("Draft saved");
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "Save failed");
       }
     });
-  }, [pageBlocks, pagePath, settings]);
+  }, [document, settings]);
 
   const publish = useCallback(() => {
     startTransition(async () => {
       try {
         if (settings) await publishSiteSettings(settings);
-        if (pagePath && pageBlocks) await publishPage(pagePath, pageBlocks);
+        if (document?.kind === "page" && document.path && document.blocks) {
+          await publishPage(document.path, document.blocks);
+        }
+        if (document?.kind === "entry" && document.type && document.slug && document.data) {
+          await publishEntry(document.type, document.slug, document.data);
+        }
         setDirty(false);
         setMessage("Published");
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "Publish failed");
       }
     });
-  }, [pageBlocks, pagePath, settings]);
+  }, [document, settings]);
 
   const logout = useCallback(() => {
     startTransition(async () => {
@@ -194,21 +255,33 @@ export function EditProvider({
     }
   }, []);
 
+  const pagePath = document?.kind === "page" ? document.path : null;
+  const pageBlocks =
+    document?.kind === "page"
+      ? document.blocks
+      : document?.kind === "entry"
+        ? document.data
+        : null;
+
   const value = useMemo<EditContextValue>(
     () => ({
-      isEditor,
-      editing: isEditor && editing,
+      isEditor: editorState.isEditor,
+      editing: editorState.isEditor && editing,
       setEditing,
       dirty,
       saving: isPending,
       message,
-      email: email ?? null,
+      email: editorState.email,
       pagePath,
       pageBlocks,
+      documentKind: document?.kind ?? null,
+      entryType: document?.kind === "entry" ? document.type : null,
+      entrySlug: document?.kind === "entry" ? document.slug : null,
       settings,
       setPageField,
       setSettingsField,
       registerPage,
+      registerEntry,
       saveDraft,
       publish,
       logout,
@@ -217,20 +290,21 @@ export function EditProvider({
     [
       dirty,
       editing,
-      email,
-      isEditor,
+      editorState,
       isPending,
       logout,
       message,
-      pageBlocks,
       pagePath,
+      pageBlocks,
       publish,
+      registerEntry,
       registerPage,
       saveDraft,
       setPageField,
       setSettingsField,
       settings,
       uploadImage,
+      document,
     ],
   );
 
@@ -250,10 +324,14 @@ export function useEdit() {
       email: null,
       pagePath: null,
       pageBlocks: null,
+      documentKind: null,
+      entryType: null,
+      entrySlug: null,
       settings: null,
       setPageField: () => undefined,
       setSettingsField: () => undefined,
       registerPage: () => undefined,
+      registerEntry: () => undefined,
       saveDraft: () => undefined,
       publish: () => undefined,
       logout: () => undefined,

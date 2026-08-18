@@ -5,6 +5,16 @@ export type ContentCard = {
   body: string;
 };
 
+export type QuickFact = {
+  label: string;
+  value: string;
+};
+
+export type AgendaItem = {
+  title: string;
+  body?: string;
+};
+
 export type EditorialPageData = {
   slug: string;
   eyebrow: string;
@@ -18,6 +28,37 @@ export type EditorialPageData = {
   externalUrl?: string;
   zohoFormUrl?: string;
   stat?: { value: string; label: string };
+
+  /* ---- Course / training fields (NSPCC + ACAS style detail pages) ----
+     All optional so existing records keep compiling. Only populate from
+     published Faith Associates copy — never infer a price or a duration. */
+
+  /** Hero chips, e.g. "One day" / "£595 + VAT for up to 20 delegates". */
+  duration?: string;
+  cost?: string;
+  /** Extra hero chips beyond duration and cost (format, certification, status). */
+  chips?: string[];
+  /** Left-hand "At a glance" rail. */
+  quickFacts?: QuickFact[];
+  /** "Who it is for" list. */
+  audience?: string[];
+  /** Real agenda / training-content list, rendered numbered — not vague cards. */
+  agendaTitle?: string;
+  agenda?: AgendaItem[];
+  /** Materials delegates take away. */
+  materialsTitle?: string;
+  materials?: string[];
+  /** Named benefit blocks where the source page has them. */
+  benefits?: ContentCard[];
+  /** Certificate / accreditation statement. */
+  certificate?: string;
+  /** Closing pull-quote from the source page. */
+  quote?: { text: string; attribution?: string };
+  /** Sibling pages in the same family. */
+  relatedSlugs?: string[];
+  /** Extra outbound link rendered next to the primary CTA. */
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
 };
 
 export const services: EditorialPageData[] = [
@@ -326,16 +367,126 @@ export const team: Array<{ name: string; role: string; image?: string }> = [
   { name: "Aman Sah", role: "Technology Lead", image: "/assets/team/aman-sah.png" },
 ];
 
+/**
+ * Organisation timeline, restored verbatim in substance from the live
+ * faithassociates.co.uk/about-us/company-history/ page.
+ */
 export const history = [
-  { year: "2004", title: "Faith Associates founded", body: "Established as a non-theological consultancy providing culturally sensitive research, training, advice and guidance to faith-based communities." },
-  { year: "2006", title: "National consultation & MINAB", body: "A national consultation with more than 1,400 mosques and Islamic centres helped establish a self-governance umbrella body for mosques and imams." },
-  { year: "2007–2009", title: "Pioneering management guides", body: "The first Mosque Management Guide was followed by a Madrassah Management Guide rooted in safeguarding and practical leadership development." },
-  { year: "2010–2014", title: "Opening institutions and building digital leadership", body: "Mosque Open Day, Imams Online, national iftar campaigns and technology partnerships widened participation and public engagement." },
-  { year: "2015–2017", title: "Women’s leadership, safeguarding and global reach", body: "New guidance supported women in mosque management, while safeguarding delivery and UN-linked work expanded internationally." },
-  { year: "2018", title: "Beacon Mosque Standards and Awards", body: "A global quality benchmark launched alongside the first British Beacon Mosque Awards." },
-  { year: "2019–2022", title: "International partnerships and resilience", body: "Work expanded across Europe, the Middle East and North America while COVID guidance and mosque-security support served institutions at scale." },
-  { year: "2023–2025", title: "Leadership, sport and sector platforms", body: "Mosque Expo, the Beacon Awards, Mosque MBA, Eman Cup and Fattah Cup connected leadership development with national partnerships." },
-  { year: "2026", title: "The next chapter", body: "Faith Associates continues to build practical standards, resilient institutions and connected leadership networks across the world." },
+  {
+    year: "2004",
+    title: "Faith Associates founded",
+    body: "Faith Associates was set up in 2004 as a non-theological consultancy to meet the needs of faith based communities. We aimed to work in a culturally sensitive, multidisciplinary way to provide research, training, advice and guidance to support the challenges faced by such communities.",
+  },
+  {
+    year: "2006",
+    title: "National consultation & launch of MINAB",
+    body: "Following a nationwide consultation in the United Kingdom, Faith Associates helped to establish a national umbrella body for mosques and imams in the UK, constituting almost 600+ organisations in a self-governance model. The body established was called MINAB.",
+  },
+  {
+    year: "2007",
+    title: "Publication of the 1st Mosque Management Guide",
+    body: "A pioneering guide to help support the management of mosques and Islamic centres, accompanied with a 16-hour training programme to support development and change in these centres.",
+  },
+  {
+    year: "2008",
+    title: "Established experts in the field",
+    body: "Faith Associates had developed bespoke training courses for mosque and madrassah management as well as dedicated certified safeguarding trainers to help improve standards across the UK. Working with safeguarding boards, Faith Associates established a unique and accredited Mosque and Madrassah Safeguarding course.",
+  },
+  {
+    year: "2009",
+    title: "Publication of the 1st Madrassah Management Guide",
+    body: "The first madrassah management guide published within a safeguarding context.",
+  },
+  {
+    year: "2010",
+    title: "Launch of the Mosque Open Day guide",
+    body: "Pioneered the development and the concept of how to open mosques to wider society and to encourage the development of an open and transparent culture.",
+  },
+  {
+    year: "2011",
+    title: "ImamsOnline.com launched",
+    body: "Faith Associates created a dedicated portal for the promotion of Islamic leadership. Imams Online was also set up to provide advice, support and training to religious leaders globally.",
+  },
+  {
+    year: "2012",
+    title: "Iftar 2012 and the London Olympics",
+    body: "Working closely with the London Olympics 2012 team, some of London’s and the wider UK’s iconic mosques opened their doors to host Olympic teams from around the world during the festival, which coincided with the Islamic month of Ramadan.",
+  },
+  {
+    year: "2013",
+    title: "Mosque Iftar",
+    body: "A national campaign to open mosques during Ramadan, to share the iftar feast with the wider community.",
+  },
+  {
+    year: "2014",
+    title: "Tech giant partnerships",
+    body: "Delivering a national roadshow with Twitter to highlight the power of social media and the potential benefits to faith leaders.",
+  },
+  {
+    year: "2015",
+    title: "Women in Mosque Management guide",
+    body: "Following extensive research and consultation about how women can play a leading role in supporting the development of services from mosques and Islamic centres, a guide was developed and launched to encourage greater involvement of women in service delivery.",
+  },
+  {
+    year: "2016",
+    title: "Safeguarding youth and adult toolkit for faith institutions",
+    body: "Following extensive consultation with all faith communities, a toolkit was launched in the UK Midlands with the support of six local authorities. The guide has since been reproduced in various parts of the UK, and aspects of it have been shared in Asia and Africa during Faith Associates training in those territories.",
+  },
+  {
+    year: "2017",
+    title: "Consolidating our global reach",
+    body: "By the end of 2017 we had provided safeguarding training to over 1,000 people across mosques globally. We also started our project with the United Nations offering faith institutional development training across East Africa, and in official partnership with Facebook launched the ‘Keeping Muslims Safe Online’ guide — the first of its kind.",
+  },
+  {
+    year: "2018",
+    title: "Beacon Mosque Standards launched",
+    body: "Following 15 years of working closely with mosques globally, Faith Associates launched a global benchmark of quality for mosques and Islamic centres, helping mosques measure themselves against matrices of quality in order to grade themselves.",
+  },
+  {
+    year: "2018",
+    title: "British Beacon Mosque Awards launched",
+    body: "The UK’s best mosques identified and celebrated at the inaugural British Beacon Mosque Awards in London.",
+  },
+  {
+    year: "2019",
+    title: "2nd British Beacon Mosque Awards",
+    body: "For the second year, 400 British mosques attended the gala dinner in London celebrating and awarding the best mosques of 2019.",
+  },
+  {
+    year: "2019",
+    title: "International partnerships",
+    body: "Working with European, Middle Eastern and North American partners and bodies, expanding the work of Faith Associates across different continents.",
+  },
+  {
+    year: "2020",
+    title: "COVID-19 guidance and support",
+    body: "Faith Associates were at the forefront of the COVID-19 pandemic providing constant support and guidance for Islamic institutions across the UK.",
+  },
+  {
+    year: "2021",
+    title: "National outreach",
+    body: "National outreach to support post-COVID integration.",
+  },
+  {
+    year: "2022",
+    title: "Security platform expands",
+    body: "Mosque security and other places of worship safety platform expands services across various continents.",
+  },
+  {
+    year: "2023",
+    title: "Beacon Awards and Mosque Expo in Greater Manchester",
+    body: "The 6th British Beacon Mosque Awards and Mosque Expo taken to Greater Manchester.",
+  },
+  {
+    year: "2024",
+    title: "Launch of the Mosque MBA",
+    body: "Launch of the master’s-level Mosque MBA, bringing 20 years of learning into one platform.",
+  },
+  {
+    year: "2025",
+    title: "Twenty years of service",
+    body: "Celebrating 20 years of service, 2005–2025. The Mosque MBA receives recruits from the UK, Europe and Africa.",
+  },
 ];
 
 export const newsItems = [

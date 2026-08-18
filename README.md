@@ -20,8 +20,12 @@ Open [http://localhost:3000](http://localhost:3000).
 Content lives in Supabase (`site_settings`, `pages`, `entries`, Storage bucket `media`) with a local seed fallback in `src/lib/cms/seed-data.ts`.
 
 ```bash
-npm run cms:smoke   # login + draft/publish + upload check
+npm run cms:smoke
 ```
+
+`npm run cms:smoke` is read-only by default. To verify editor login, set `CMS_TEST_EMAIL` and `CMS_TEST_PASSWORD`. To run draft/publish/upload checks, also set `CMS_SMOKE_MODE=write`.
+
+If public CMS reads fail, apply [scripts/cms-rls.sql](/Users/efi/Documents/Work/Faith%20Associates/_site-audit/scripts/cms-rls.sql) in Supabase to grant public published-content reads and editor write access.
 
 ## Learn More
 

@@ -95,6 +95,7 @@ export async function savePageDraft(path: string, blocks: Record<string, unknown
     });
     if (error) throw new Error(error.message);
   }
+  revalidateSite(path === "/" ? "/" : path);
   return { ok: true };
 }
 
@@ -142,6 +143,7 @@ export async function saveEntryDraft(
     { onConflict: "type,slug" },
   );
   if (error) throw new Error(error.message);
+  revalidateSite();
   return { ok: true };
 }
 
@@ -208,7 +210,258 @@ export async function createEntry(
     updated_by: user.id,
   });
   if (error) throw new Error(error.message);
+  revalidateSite();
   return { ok: true };
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function resolveUploadedImage(formData: FormData, imageKey: string, fileKey: string, alt: string) {
+  let image = String(formData.get(imageKey) || "").trim();
+  const file = formData.get(fileKey);
+
+  if (file instanceof Blob && file.size > 0) {
+    const uploadFormData = new FormData();
+    uploadFormData.set("file", file);
+    uploadFormData.set("alt", alt);
+    const uploaded = await uploadMedia(uploadFormData);
+    image = uploaded.url;
+  }
+
+  return image;
+}
+
+function normalizeCmsPath(value: string) {
+  const cleaned = value
+    .trim()
+    .replace(/^https?:\/\/[^/]+/i, "")
+    .replace(/[?#].*$/, "")
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
+
+  return cleaned ? `/${cleaned}` : "/";
+}
+
+const reservedCmsSegments = new Set([
+  "_next",
+  "about",
+  "api",
+  "cms",
+  "contact",
+  "events",
+  "international",
+  "news",
+  "privacy",
+  "projects",
+  "publications",
+  "services",
+  "sport",
+]);
+
+function validateGenericCmsPath(path: string) {
+  if (path === "/") return "Use the homepage editor for '/'.";
+  const firstSegment = path.split("/").filter(Boolean)[0] ?? "";
+  if (reservedCmsSegments.has(firstSegment)) {
+    return `Paths under '/${firstSegment}' are already handled by built-in routes.`;
+  }
+  return null;
+}
+
+function buildGenericPageBlocks(title: string, summary: string) {
+  return {
+    hero: {
+      eyebrow: "New page",
+      title,
+      summary,
+      image: "/assets/real/faith-training-speaker.jpg",
+    },
+    intro: {
+      eyebrow: "Overview",
+      title: "Shape this page in the CMS.",
+      body: "Use the inline editor to replace this starter content with your own copy, structure and calls to action.",
+    },
+    sections: [
+      {
+        title: "First section",
+        body: "Add the core information for this page here.",
+      },
+      {
+        title: "Second section",
+        body: "Use additional sections for supporting detail, guidance or next steps.",
+      },
+    ],
+  } satisfies Record<string, unknown>;
+}
+
+function buildPublicationPayload(input: {
+  title: string;
+  summary?: string;
+  category?: string;
+  format?: string;
+  year?: string;
+  image?: string;
+  downloadUrl?: string;
+  zohoFormUrl?: string;
+}) {
+  return {
+    title: input.title,
+    category: input.category || "Reports & insight",
+    summary: input.summary || "Add a short summary for this publication.",
+    image: input.image || "/assets/real/fa-activity-report-2024.png",
+    format: input.format || "Guide",
+    year: input.year || String(new Date().getFullYear()),
+    isLegacy: false,
+    downloadUrl: input.downloadUrl || undefined,
+    zohoFormUrl: input.zohoFormUrl || undefined,
+    legacyNoticeTitle: "Archived operational guidance.",
+    legacyNoticeBody:
+      "This resource is preserved for historical reference and may not reflect current public-health, legal or regulatory requirements.",
+    accessEyebrow: "Access the resource",
+    downloadCtaLabel: "Download publication",
+    requestCtaLabel: "Request this publication",
+    publishedBy: "Published by Faith Associates",
+    resourceTypeLabel: "Resource type",
+    catalogueYearLabel: "Catalogue year",
+    overviewEyebrow: "Overview",
+    overviewTitle: "Guidance grounded in sector experience.",
+    overviewBody:
+      "Faith Associates develops publications from direct work with faith institutions, leadership teams and delivery partners. The aim is to turn field learning into practical material that can inform discussion, planning and implementation.",
+    requestEyebrow: "Request this publication",
+    requestTitle: "Complete the form below.",
+    requestBody: "Register your details to receive this publication from Faith Associates.",
+    usageEyebrow: "Using this publication",
+    usageSteps: [
+      "Review the resource with the people responsible for governance or delivery in your institution.",
+      "Adapt recommendations to your context, legal duties, risk profile and available capacity.",
+      "Turn agreed actions into named responsibilities, timescales and a clear review point.",
+    ],
+    implementationTitle: "Need help implementing it?",
+    implementationBody:
+      "The Faith Associates team can support training, review, policy development and implementation linked to this area of work.",
+    implementationCtaLabel: "Talk to the team",
+    relatedEyebrow: "Continue reading",
+    relatedTitle: "Related publications",
+    relatedCtaLabel: "View library",
+  };
+}
+
+export async function createNewsPostAction(formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const summary = String(formData.get("summary") || "").trim();
+  const category = String(formData.get("category") || "").trim() || "News";
+  const date = String(formData.get("date") || "").trim();
+  const slugInput = String(formData.get("slug") || "").trim();
+  const bodyRaw = String(formData.get("body") || "").trim();
+  const slug = slugify(slugInput || title);
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (!summary) return { ok: false, error: "Summary is required." };
+  if (!slug) return { ok: false, error: "A valid slug is required." };
+
+  const image = await resolveUploadedImage(formData, "imageUrl", "imageFile", title);
+
+  const body = bodyRaw
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  try {
+    await createEntry(
+      "news",
+      slug,
+      {
+        date: date || new Date().toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        category,
+        title,
+        summary,
+        image: image || "/assets/real/mosque-expo-2024-hall.jpg",
+        body: body.length ? body : [summary],
+      },
+      Date.now(),
+    );
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Post creation failed." };
+  }
+
+  return { ok: true, slug, path: `/news/${slug}` };
+}
+
+export async function createPublicationAction(formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const slugInput = String(formData.get("slug") || "").trim();
+  const slug = slugify(slugInput || title);
+
+  if (!title) return { ok: false, error: "Title is required." };
+  if (!slug) return { ok: false, error: "A valid slug is required." };
+
+  const image = await resolveUploadedImage(formData, "imageUrl", "imageFile", title);
+
+  try {
+    await createEntry(
+      "publication",
+      slug,
+      buildPublicationPayload({
+        title,
+        summary: String(formData.get("summary") || "").trim(),
+        category: String(formData.get("category") || "").trim(),
+        format: String(formData.get("format") || "").trim(),
+        year: String(formData.get("year") || "").trim(),
+        image,
+        downloadUrl: String(formData.get("downloadUrl") || "").trim(),
+        zohoFormUrl: String(formData.get("zohoFormUrl") || "").trim(),
+      }),
+      Date.now(),
+    );
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Publication creation failed." };
+  }
+
+  return { ok: true, slug, path: `/publications/${slug}` };
+}
+
+export async function createCmsPageAction(formData: FormData) {
+  const title = String(formData.get("title") || "").trim();
+  const summary = String(formData.get("summary") || "").trim();
+  const pathInput = String(formData.get("path") || "").trim();
+  const derivedPath = normalizeCmsPath(pathInput || slugify(title));
+
+  if (!title) return { ok: false, error: "Title is required." };
+
+  const pathError = validateGenericCmsPath(derivedPath);
+  if (pathError) return { ok: false, error: pathError };
+
+  const { supabase, user } = await requireEditor();
+  const blocks = buildGenericPageBlocks(
+    title,
+    summary || "Add a short summary for this page.",
+  );
+
+  const { error } = await supabase.from("pages").insert({
+    path: derivedPath,
+    title,
+    blocks,
+    draft_blocks: blocks,
+    status: "draft",
+    updated_by: user.id,
+  });
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidateSite(derivedPath);
+  return { ok: true, path: derivedPath };
 }
 
 export async function uploadMedia(formData: FormData) {

@@ -8,124 +8,33 @@ import { RotatingHeroCopy } from "./components/RotatingHeroCopy";
 import { ServicesCarousel, type ServiceSlide } from "./components/ServicesCarousel";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
-import { WhatWeDoCarousel } from "./components/WhatWeDoCarousel";
+import { WhatWeDoCarousel, type CapabilityItem } from "./components/WhatWeDoCarousel";
 import { WhoWeAreSection } from "./components/WhoWeAreSection";
 import { CmsPage } from "./components/cms/CmsPage";
+import { ArrowIcon } from "./components/icons";
 import { EditableHeroMedia } from "./components/cms/EditableHeroMedia";
 import { EditableText } from "./components/cms/EditableText";
+import type { HomeBlocks } from "@/lib/cms/types";
 import { getHomeBlocks } from "@/lib/cms/queries";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
-
-const heroStories = [
-  { label: "Mosque Security", href: "/projects/mosque-security" },
-  { label: "Leadership Development", href: "/projects/faith-associates-academy" },
-  { label: "International Networks", href: "/international" },
-  { label: "Mosque Expo 2026", href: "/projects/mosque-expo", active: true },
-];
-
-const heroMessages = [
-  {
-    eyebrow: "Faith Associates 2026",
-    title: "Raising standards for faith institutions.",
-    body: "Practical support for mosques, madrassahs and community leaders.",
-    ctaLabel: "Explore our work",
-    href: "/projects",
-  },
-  {
-    eyebrow: "Security and resilience",
-    title: "Safer mosques. Stronger governance.",
-    body: "Training, guidance and standards for places of worship.",
-    ctaLabel: "See our services",
-    href: "/services",
-  },
-  {
-    eyebrow: "Leadership and networks",
-    title: "Developing leaders and community impact.",
-    body: "Programmes, partnerships and events that strengthen institutions.",
-    ctaLabel: "View programmes",
-    href: "/projects",
-  },
-];
-
-const capabilities = [
-  {
-    title: "Institutional Development",
-    body: "Governance, standards, leadership and practical support for mosques, madrassahs and faith charities.",
-    icon: "institution" as const,
-  },
-  {
-    title: "Protective Security",
-    body: "Training, risk awareness and incident guidance for places of worship and community institutions.",
-    icon: "security" as const,
-  },
-  {
-    title: "Cohesion Programmes",
-    body: "Sport, youth engagement and partnership programmes that build cohesion across communities.",
-    icon: "cohesion" as const,
-  },
-  {
-    title: "Global Networks",
-    body: "International convening, research and knowledge sharing across faith institution leadership networks.",
-    icon: "networks" as const,
-  },
-];
-
-const services: ServiceSlide[] = [
-  {
-    title: "Inclusivity in Sports",
-    image: "/assets/inclusivity-sport.png",
-    href: "/sport",
-    icon: "sport",
-  },
-  {
-    title: "Security in Places of Worship",
-    image: "/assets/real/security-training-session.jpg",
-    href: "/projects/mosque-security",
-    icon: "security",
-  },
-  {
-    title: "Strategic Leadership Development",
-    image: "/assets/real/who-we-are-training.jpg",
-    href: "/projects/faith-associates-academy",
-    icon: "leadership",
-  },
-  {
-    title: "Environmental Practices",
-    image: "/assets/environmental-practices.png",
-    href: "/projects/eco-mosque",
-    icon: "environment",
-  },
-];
-
-const news = [
-  {
-    title: "Mosque Expo 2026 returns, uniting leaders and innovators",
-    image: "/assets/real/mosque-expo-2024-hall.jpg",
-    meta: "May 7, 2026 / Announcement",
-    href: "/news/mosque-expo-2026",
-  },
-  {
-    title: "Strengthening Mosque Resilience with Aston University",
-    image: "/assets/real/faith-training-speaker.jpg",
-    meta: "June 2, 2025 / Blog",
-    href: "/news/mosque-resilience-aston",
-  },
-  {
-    title: "Eco-Mosque Net Zero Conference for mosque leadership",
-    image: "/assets/real/eco-mosque-conference.jpg",
-    meta: "April 22, 2025 / Sustainability",
-    href: "/news/eco-mosque-net-zero",
-  },
-];
 
 export default async function Home() {
   const { settings, preferDraft } = await loadCmsPage("/");
   const blocks = await getHomeBlocks({ preferDraft });
   const cmsHeroStories = blocks.hero.stories;
   const cmsHeroMessages = blocks.hero.messages;
-  const cmsCapabilities = blocks.whatWeDo.capabilities as typeof capabilities;
+  const cmsCapabilities = blocks.whatWeDo.capabilities.map((item) => ({
+    ...item,
+    icon:
+      item.icon === "institution" ||
+      item.icon === "security" ||
+      item.icon === "cohesion" ||
+      item.icon === "networks"
+        ? item.icon
+        : "institution",
+  })) as CapabilityItem[];
   const cmsServices = blocks.servicesCarousel.items as ServiceSlide[];
-  const cmsNews = blocks.newsCarousel.items;
+  const cmsNews = blocks.newsCarousel.items as HomeBlocks["newsCarousel"]["items"];
 
   return (
     <CmsPage path="/" blocks={blocks}>
@@ -162,13 +71,17 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="international" className="bg-white py-12 sm:py-16 lg:py-24">
+      <section id="international" className="band band-white">
         <div className="section-shell">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="type-display text-[clamp(1.7rem,3.2vw,2.5rem)] text-[var(--ink)]">
-              <EditableText value={blocks.whatWeDo.title} path="whatWeDo.title" />
-            </h2>
-            <p className="type-body mt-4 text-[var(--muted)] lg:text-[1.05rem]">
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-end lg:gap-16">
+            <div>
+              <p className="type-eyebrow text-[var(--blue)]">What we do</p>
+              <h2 className="type-display mt-4 max-w-[16ch] text-[clamp(1.9rem,3.6vw,3rem)] text-[var(--ink)]">
+                <EditableText value={blocks.whatWeDo.title} path="whatWeDo.title" />
+              </h2>
+              <div className="rule-red mt-6" />
+            </div>
+            <p className="type-body max-w-[40rem] text-[1.02rem] text-[var(--muted)] lg:text-[1.12rem]">
               <EditableText value={blocks.whatWeDo.body} path="whatWeDo.body" multiline />
             </p>
           </div>
@@ -250,46 +163,44 @@ export default async function Home() {
 
       <WhoWeAreSection content={blocks.whoWeAre} />
 
-      <section id="services" className="bg-white py-12 lg:py-20">
+      <section id="services" className="band band-white band-rule">
         <div className="section-shell">
-          <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 text-center">
+          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-end lg:gap-16">
             <div>
-              <p className="type-eyebrow text-[var(--blue)]">What we deliver</p>
-              <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
+              <p className="type-eyebrow text-[var(--blue)]">Key strategic services</p>
+              <h2 className="type-display mt-4 max-w-[16ch] text-[clamp(1.9rem,3.6vw,3rem)] text-[var(--ink)]">
                 <EditableText value={blocks.servicesCarousel.title} path="servicesCarousel.title" />
               </h2>
+              <div className="rule-red mt-6" />
             </div>
-            <p className="type-body max-w-md text-[var(--muted)] lg:text-[1.05rem]">
-              <EditableText value={blocks.servicesCarousel.body} path="servicesCarousel.body" multiline />
-            </p>
+            <div className="max-w-[40rem]">
+              <p className="type-body text-[1.02rem] text-[var(--muted)] lg:text-[1.12rem]">
+                <EditableText value={blocks.servicesCarousel.body} path="servicesCarousel.body" multiline />
+              </p>
+              <Link href="/services" className="btn-primary mt-6 w-full sm:w-auto">
+                Browse all services <ArrowIcon />
+              </Link>
+            </div>
           </div>
           <ServicesCarousel items={cmsServices} />
         </div>
       </section>
 
-      <section id="projects" className="scroll-mt-8 bg-[var(--soft)] py-12 lg:py-20">
+      <section id="projects" className="band band-soft scroll-mt-8">
         <div className="section-shell">
-          <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 text-center">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
             <div>
-              <p className="type-eyebrow text-[var(--blue)]">Latest updates</p>
-              <h2 className="type-display mt-3 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
+              <p className="type-eyebrow text-[var(--blue)]">News &amp; events</p>
+              <h2 className="type-display mt-4 max-w-[18ch] text-[clamp(1.9rem,3.6vw,3rem)] text-[var(--ink)]">
                 <EditableText value={blocks.newsCarousel.title} path="newsCarousel.title" />
               </h2>
+              <div className="rule-red mt-6" />
             </div>
             <Link
               href="/news"
-              className="type-cta inline-flex items-center justify-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
+              className="type-cta inline-flex shrink-0 items-center gap-2 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
             >
-              View all news
-              <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M4 8h7M8.5 3.5 13 8l-4.5 4.5"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.7"
-                />
-              </svg>
+              View all news <ArrowIcon />
             </Link>
           </div>
           <NewsUpdatesCarousel items={cmsNews} />
@@ -298,49 +209,59 @@ export default async function Home() {
 
       <FeaturedPublications content={blocks.featuredPublications} />
 
-      <section id="contact" className="bg-[var(--soft)] py-12 text-[var(--ink)] lg:py-20">
+      {/* Dark closing band: proof + a real job (contact the team) */}
+      <section id="contact" className="band band-navy">
         <div className="section-shell">
-          <div className="grid gap-10 text-center lg:grid-cols-[0.42fr_0.58fr] lg:items-start lg:gap-16 lg:text-left">
+          <div className="grid gap-10 lg:grid-cols-[0.48fr_0.52fr] lg:items-start lg:gap-16">
             <div>
-              <p className="type-eyebrow text-[var(--blue)]">Get in touch</p>
-              <h2 className="type-display mt-4 text-[clamp(1.85rem,3.6vw,2.75rem)]">
+              <p className="type-eyebrow">Get in touch</p>
+              <h2 className="type-display mt-4 max-w-[14ch] text-[clamp(2.1rem,4.4vw,3.5rem)] text-white">
                 Start a conversation.
               </h2>
-              <p className="type-body mx-auto mt-4 max-w-md text-[var(--muted)] lg:mx-0 lg:text-[1.05rem]">
-                Tell us what your institution needs and the team will come back with the right next step.
+              <div className="rule-red mt-6" />
+              <p className="type-body mt-6 max-w-[34rem] text-[1.05rem]">
+                Tell us what your institution needs and the team will come back with the right next
+                step.
               </p>
 
-              <div className="mx-auto mt-8 flex max-w-sm flex-col gap-6 text-sm text-[var(--muted)] sm:max-w-none lg:mx-0">
-                <div>
-                  <p className="type-meta text-[var(--blue)]">Address</p>
-                  <p className="type-body mt-2">
+              <div className="mt-10 grid gap-px bg-white/12 sm:grid-cols-2">
+                <div className="bg-[var(--navy)] py-5 pr-5 sm:px-5">
+                  <p className="type-meta">Address</p>
+                  <p className="type-body mt-2 text-[1rem]">
                     41 Baker Street
                     <br />
                     High Wycombe, HP11 2RZ
                   </p>
                 </div>
-                <div>
-                  <p className="type-meta text-[var(--blue)]">Contact</p>
-                  <p className="type-body mt-2">
-                    <a href="tel:+441494416202" className="font-medium text-[var(--ink)] transition duration-300 hover:text-[var(--blue)]">
+                <div className="bg-[var(--navy)] py-5 pr-5 sm:px-5">
+                  <p className="type-meta">Contact</p>
+                  <p className="mt-2">
+                    <a
+                      href="tel:+441494416202"
+                      className="type-title text-[1.15rem] text-white transition duration-300 hover:text-[var(--blue-light)]"
+                    >
                       +44 (0)1494 416202
                     </a>
                   </p>
-                  <p className="type-body mt-1 hidden sm:block">Use the form for quotes, partnerships and consultations.</p>
+                  <p className="type-body mt-1 text-[0.95rem]">
+                    Quotes, partnerships and consultations.
+                  </p>
                 </div>
               </div>
+
+              <Link href="/contact" className="btn-secondary mt-8 w-full text-white hover:bg-white hover:text-[var(--navy)] sm:w-auto">
+                Full contact details <ArrowIcon />
+              </Link>
             </div>
 
-            <div className="w-full max-w-[820px] justify-self-center lg:justify-self-end">
-              <div className="border border-[var(--line)] bg-white px-6 py-8 text-center sm:hidden">
-                <p className="type-body text-sm text-[var(--muted)]">
-                  Ready to talk? Open the contact form for quotes, partnerships and consultations.
+            <div className="panel-frame w-full">
+              <div className="panel-frame__head">
+                <p className="type-eyebrow text-[var(--blue-light)]">Enquiry form</p>
+                <p className="type-title mt-2 text-[1.25rem] text-white">
+                  Tell us about your institution
                 </p>
-                <Link href="/contact" className="btn-primary mt-6 w-full">
-                  Open contact form
-                </Link>
               </div>
-              <div className="hidden sm:block">
+              <div className="panel-frame__body bg-white text-[var(--ink)]">
                 <ContactForm />
               </div>
             </div>

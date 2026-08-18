@@ -83,6 +83,22 @@ const impactStats = [
   { value: "20+", label: "years of impact" },
 ];
 
+/** Partner and client logos as shown on faithassociates.co.uk/about-us/ */
+const partnerLogos = [
+  { src: "/assets/clients/united-nations.jpg", alt: "United Nations" },
+  { src: "/assets/clients/undp.png", alt: "United Nations Development Programme" },
+  { src: "/assets/clients/google-org.jpg", alt: "Google.org" },
+  { src: "/assets/clients/facebook-meta.jpg", alt: "Facebook / Meta" },
+  { src: "/assets/clients/muslim-peace-forum.jpg", alt: "Muslim Peace Forum" },
+  { src: "/assets/clients/lancashire-council-of-mosques.jpg", alt: "Lancashire Council of Mosques" },
+  { src: "/assets/clients/bradford-council-for-mosques.jpg", alt: "Bradford Council for Mosques" },
+  { src: "/assets/clients/islamic-relief.jpg", alt: "Islamic Relief" },
+  { src: "/assets/clients/gpp.jpg", alt: "Global Peace and Prosperity" },
+  { src: "/assets/clients/hillingdon-council.jpg", alt: "Hillingdon Council" },
+  { src: "/assets/clients/wandsworth-council.jpg", alt: "Wandsworth Council" },
+  { src: "/assets/clients/lbbd.jpg", alt: "London Borough of Barking and Dagenham" },
+];
+
 const trustMarks = [
   "Beacon Mosque",
   "Mosque Security",
@@ -222,8 +238,15 @@ function ValueIcon({ type }: { type: (typeof valueCards)[number]["icon"] }) {
 
 export default async function AboutPage() {
   const { settings, page } = await loadCmsPage("/about");
-  const blocks = page?.blocks as Record<string, any> | undefined;
-  const hero = blocks?.hero;
+  const blocks = page?.blocks as Record<string, unknown> | undefined;
+  const hero = blocks?.hero as
+    | Partial<{
+        eyebrow: string;
+        title: string;
+        summary: string;
+        image: string;
+      }>
+    | undefined;
   return (
     <CmsPage path="/about" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
@@ -263,22 +286,29 @@ export default async function AboutPage() {
 
         <div className="flex flex-col justify-center bg-white px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20 xl:px-16">
           <div className="max-w-xl">
-            <p className="type-body text-[var(--muted)]">
-              Faith Associates was founded in 2004 as a non-theological consultancy serving ethnic minority
-              faith-based communities. Our work brings research, training, advice and implementation guidance
-              together so institutions can make better decisions under real-world pressure.
+            <p className="type-body text-[1.02rem] text-[var(--muted)]">
+              Faith Associates was set up in 2004 as a non-theological consultancy to meet the needs of
+              ethnic minority faith-based communities. We work in a culturally sensitive, multidisciplinary
+              way to provide research, training, advice and guidance to support and influence the challenges
+              faced by these communities. A key area of focus is developing institutional governance,
+              improving strategic choices, and developing effective communication strategies.
             </p>
-            <p className="type-body mt-5 text-[var(--muted)]">
-              We support mosques, madrassahs, charities and sector partners with governance, safeguarding,
-              strategic leadership, protective security and community development. The goal is practical change,
-              not abstract theory.
+            <p className="type-body mt-5 text-[1.02rem] text-[var(--muted)]">
+              Faith Associates recognises the key roles places of worship play in providing guidance. We also
+              recognise the difficulties faced by faith leaders and other key members of community
+              institutions when providing guidance, sound thinking and educational experiences. With our years
+              of experience and expertise in multifaceted teams located in various parts of the world, we know
+              we can help.
             </p>
 
             <div className="mt-10 border-t border-[var(--line)] pt-8">
-              <h3 className="type-title text-[1.35rem] text-[var(--ink)] sm:text-[1.5rem]">Our mission.</h3>
-              <p className="type-body mt-4 text-[var(--muted)]">
-                We help faith institutions turn complexity into capability by combining specialist knowledge,
-                partnership working and grounded sector understanding.
+              <h3 className="type-title text-[1.35rem] text-[var(--ink)] sm:text-[1.5rem]">Our mission</h3>
+              <p className="type-body mt-4 text-[1.02rem] text-[var(--muted)]">
+                Working with agencies concerned with business, education and government at local, regional,
+                national and international levels has enabled us to identify the misconceptions that face
+                faith-based communities and to work towards challenging these. Our work has focused on the
+                greater inclusion of all members of faith-based communities, and we are working towards
+                increasing the confidence and skills of women and young people.
               </p>
             </div>
           </div>
@@ -437,7 +467,37 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <section id="partners" className="scroll-mt-8 bg-white py-20 lg:py-24">
+      {/* UN Sustainable Development Goals — restored from the live About page */}
+      <section id="sdgs" className="band band-soft scroll-mt-24">
+        <div className="section-shell grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-16">
+          <div>
+            <p className="type-eyebrow text-[var(--blue)]">United Nations</p>
+            <h2 className="type-display mt-4 max-w-[18ch] text-[clamp(1.85rem,3.4vw,2.8rem)] text-[var(--ink)]">
+              Working towards the UN Sustainable Development Goals.
+            </h2>
+            <div className="rule-red mt-6" />
+            <p className="type-body mt-6 max-w-[36rem] text-[1.02rem] text-[var(--muted)]">
+              Faith Associates, through some of its key strategic projects and programmes, has been working
+              towards achieving the key United Nations Sustainable Development Goals shown here.
+            </p>
+            <Link href="/international" className="btn-primary mt-8 w-full sm:w-auto">
+              Our international work <ArrowIcon />
+            </Link>
+          </div>
+          <div className="border border-[var(--line)] bg-white p-5 lg:p-7">
+            <Image
+              src="/assets/about/un-sdgs.png"
+              alt="The United Nations Sustainable Development Goals that Faith Associates works towards"
+              width={1200}
+              height={640}
+              sizes="(max-width: 1024px) 100vw, 55vw"
+              className="h-auto w-full object-contain"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section id="partners" className="band band-white scroll-mt-24">
         <div className="section-shell grid gap-12 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
           <div className="media-frame relative min-h-[360px]">
             <Image
@@ -460,9 +520,34 @@ export default async function AboutPage() {
             <p className="type-body mt-8 max-w-2xl text-lg text-[var(--muted)]">
               Our strongest work is collaborative. We bring sector knowledge and a clear delivery method; partners bring the institutional context, lived experience and relationships that make change sustainable.
             </p>
-            <p className="type-body mt-5 max-w-2xl text-sm text-[var(--muted)]">
+            <p className="type-body mt-5 max-w-2xl text-[1rem] text-[var(--muted)]">
               That approach has supported long-term relationships across faith institutions, civil society, government, technology, sport and international development.
             </p>
+            <Link href="/about/clients" className="btn-secondary mt-8 border-[var(--navy)] text-[var(--navy)] hover:bg-[var(--navy)] hover:text-white">
+              See our partners <ArrowIcon />
+            </Link>
+          </div>
+        </div>
+
+        <div className="section-shell mt-14">
+          <p className="type-eyebrow text-[var(--blue)]">Partners and clients</p>
+          <div className="mt-7 grid grid-cols-2 gap-px border border-[var(--line)] bg-[var(--line)] sm:grid-cols-3 lg:grid-cols-6">
+            {partnerLogos.map((logo) => (
+              <div
+                key={logo.src}
+                className="flex items-center justify-center bg-white p-6"
+                title={logo.alt}
+              >
+                <Image
+                  src={logo.src}
+                  alt={logo.alt}
+                  width={220}
+                  height={120}
+                  sizes="(max-width: 640px) 45vw, 16vw"
+                  className="h-14 w-auto object-contain opacity-80 transition hover:opacity-100"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>

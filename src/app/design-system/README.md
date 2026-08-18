@@ -20,6 +20,12 @@ Shared language for humans and agents. Do not import Astryx or another component
 | Soft surface | `--soft` | Section tint |
 | Line | `--line` | Hairline rules |
 | Muted | `--muted` | Secondary copy |
+| Dark surface (deepest) | `--navy-deep` | Footer legal bar |
+| Raised dark surface | `--navy-raised` | Cards inside navy bands |
+| Action hover | `--red-dark` | `btn-primary:hover` — red deepens, never turns blue |
+| Header chrome | `--header-ink` / `--header-surface` / `--header-line` / `--header-muted` | Mobile + utility bars |
+
+Typeface is **Poppins** (`--font-poppins`, loaded in `layout.tsx`). Do not fall back to Inter or Arial.
 
 JS mirror: `src/app/design-system/tokens.ts` (keep in sync with `globals.css`).
 
@@ -28,15 +34,26 @@ JS mirror: `src/app/design-system/tokens.ts` (keep in sync with `globals.css`).
 | Class | Purpose |
 | --- | --- |
 | `section-shell` | Page width + gutters |
-| `section-head` / `--center` / `--split` | Section intro layouts |
+| `band` / `band-tight` | Vertical rhythm for a section. Always pair with a surface. |
+| `band-soft` / `band-white` / `band-navy` | Section surface. `band-navy` recolours eyebrows and body copy for you. |
+| `band-rule` | Hairline above a band (adapts on navy) |
 | `type-eyebrow` | Uppercase section label |
 | `type-display` / `type-title` / `type-body` / `type-meta` / `type-cta` | Type roles |
 | `btn-primary` / `btn-secondary` | CTAs |
-| `surface-card` | Editorial list/card row (no consumer-app cards) |
+| `icon-tile` (+ `icon-tile-lg`, `--red`, `--navy`, `--on-navy`, `--ghost`) | **Every** meaningful icon. 48px mobile / 56px desktop coloured square. Bare line icons are only allowed for inline arrows and form affordances. |
+| `index-number` (+ `--quiet`, `--on-navy`) | Oversized `01` numerals on cards and agendas |
+| `stat-figure` | Oversized proof numbers (5000+, 20+) |
+| `chip-row` / `chip` (+ `--on-navy`, `--accent`) | Hero metadata: duration, cost, status |
+| `rule-red` | Short red rule under a headline |
+| `panel-frame` / `__head` / `__body` | Framed booking + enquiry panels. A form embed is never bare. |
+| `sticky-rail` | Sticky "At a glance" column (static below `lg`) |
 | `media-frame` | Image crop + hover zoom |
-| `accent-rule` | Short brand rule |
 | `field` / `field-label` / `field-hint` / `field-error` | Forms |
 | `skip-link` | Skip to main content |
+| `capability-index` | Small numeric label (legacy; prefer `index-number`) |
+
+Icons live in `src/app/components/icons.tsx`. Import from there — do not redeclare `ArrowIcon`
+in a page or component file.
 
 ## Layout recipe
 

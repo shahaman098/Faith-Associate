@@ -1,6 +1,9 @@
 "use client";
 
 import { startTransition, useEffect, useEffectEvent, useRef, useState } from "react";
+import { EditableText } from "./cms/EditableText";
+import { useEdit } from "./cms/EditProvider";
+import { capabilityIcons } from "./icons";
 
 export type CapabilityItem = {
   title: string;
@@ -12,63 +15,24 @@ type WhatWeDoCarouselProps = {
   items: CapabilityItem[];
 };
 
+const capabilityIconOptions: Array<{ value: CapabilityItem["icon"]; label: string }> = [
+  { value: "institution", label: "Institution" },
+  { value: "security", label: "Security" },
+  { value: "cohesion", label: "Cohesion" },
+  { value: "networks", label: "Networks" },
+];
+
+function isCapabilityIcon(value: unknown): value is CapabilityItem["icon"] {
+  return capabilityIconOptions.some((option) => option.value === value);
+}
+
 function CapabilityIcon({ type }: { type: CapabilityItem["icon"] }) {
-  const common = {
-    className: "size-7",
-    viewBox: "0 0 32 32",
-    fill: "none",
-    "aria-hidden": true as const,
-  };
-
-  if (type === "institution") {
-    return (
-      <svg {...common}>
-        <path d="M6 26h20M8 26V14l8-6 8 6v12" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-        <path d="M13 26v-6h6v6M16 8v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M11 17.5h2M19 17.5h2M11 21h2M19 21h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    );
-  }
-
-  if (type === "security") {
-    return (
-      <svg {...common}>
-        <path
-          d="M16 4.5 25 8.5v7.2c0 5.2-3.7 9.6-9 10.8-5.3-1.2-9-5.6-9-10.8V8.5L16 4.5Z"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-        <path d="m12.2 16.2 2.5 2.5 5.1-5.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  if (type === "cohesion") {
-    return (
-      <svg {...common}>
-        <circle cx="11" cy="11" r="3.2" stroke="currentColor" strokeWidth="1.6" />
-        <circle cx="21" cy="11" r="3.2" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M5.5 24c.8-3.4 3.2-5.2 5.5-5.2s4.7 1.8 5.5 5.2M15.5 24c.8-3.4 3.2-5.2 5.5-5.2s4.7 1.8 5.5 5.2"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-      </svg>
-    );
-  }
-
-  return (
-    <svg {...common}>
-      <circle cx="16" cy="16" r="9" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M7 16h18M16 7c2.6 2.4 4 5.1 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.1-4-9s1.4-6.6 4-9Z" stroke="currentColor" strokeWidth="1.6" />
-      <circle cx="16" cy="16" r="2" fill="currentColor" />
-    </svg>
-  );
+  const Glyph = capabilityIcons[type] ?? capabilityIcons.institution;
+  return <Glyph />;
 }
 
 export function WhatWeDoCarousel({ items }: WhatWeDoCarouselProps) {
+  const { editing, setPageField } = useEdit();
   const railRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -173,7 +137,7 @@ export function WhatWeDoCarousel({ items }: WhatWeDoCarouselProps) {
   return (
     <div
       ref={railRef}
-      className="-mx-6 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:mt-12 sm:grid sm:grid-cols-2 sm:gap-x-8 sm:gap-y-12 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:mt-14 lg:grid-cols-4 lg:gap-10 [&::-webkit-scrollbar]:hidden"
+      className="-mx-6 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:mt-12 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 sm:pb-0 sm:snap-none lg:mt-14 lg:grid-cols-4 lg:gap-5 [&::-webkit-scrollbar]:hidden"
       onPointerEnter={() => setIsPaused(true)}
       onPointerLeave={() => setIsPaused(false)}
       onTouchStart={() => setIsPaused(true)}
@@ -188,18 +152,42 @@ export function WhatWeDoCarousel({ items }: WhatWeDoCarouselProps) {
     >
       {items.map((item, index) => (
         <article
-          key={item.title}
+          key={index}
           data-capability-slide="true"
-          className="group flex h-full w-[calc(100vw-2.75rem)] shrink-0 snap-center flex-col text-center sm:w-auto sm:shrink sm:snap-none sm:text-left"
+          className="group flex h-full w-[calc(100vw-2.75rem)] shrink-0 snap-center flex-col border border-[var(--line)] bg-white p-6 text-center transition duration-300 hover:border-[var(--blue)] sm:w-auto sm:shrink sm:snap-none sm:p-8 sm:text-left"
         >
           <div className="flex flex-col items-center gap-3 sm:items-start">
-            <span className="inline-flex size-11 items-center justify-center text-[var(--blue)] transition duration-300 group-hover:text-[var(--blue-dark)]">
-              <CapabilityIcon type={item.icon} />
+            <span className="icon-tile icon-tile-lg">
+              <CapabilityIcon type={isCapabilityIcon(item.icon) ? item.icon : "institution"} />
             </span>
-            <p className="capability-index">0{index + 1}</p>
+            {editing ? (
+              <label className="flex flex-col items-center gap-1 sm:items-start">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Icon
+                </span>
+                <select
+                  value={isCapabilityIcon(item.icon) ? item.icon : "institution"}
+                  onChange={(event) => {
+                    setPageField(`whatWeDo.capabilities.${index}.icon`, event.currentTarget.value);
+                  }}
+                  className="border border-[var(--line)] bg-white px-3 py-1.5 text-[11px] font-semibold text-[var(--ink)]"
+                >
+                  {capabilityIconOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            <p className="index-number index-number--quiet" aria-hidden="true">0{index + 1}</p>
           </div>
-          <h3 className="type-title mt-4 text-[1.25rem] text-[var(--ink)] sm:text-[1.4rem]">{item.title}</h3>
-          <p className="type-body mt-3 text-sm text-[var(--muted)] sm:mt-4">{item.body}</p>
+          <h3 className="type-title mt-5 text-[1.3rem] text-[var(--ink)] sm:text-[1.5rem]">
+            <EditableText value={item.title} path={`whatWeDo.capabilities.${index}.title`} />
+          </h3>
+          <p className="type-body mt-3 text-[0.95rem] text-[var(--muted)] sm:mt-4">
+            <EditableText value={item.body} path={`whatWeDo.capabilities.${index}.body`} multiline />
+          </p>
         </article>
       ))}
     </div>

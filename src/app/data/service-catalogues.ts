@@ -13,18 +13,33 @@ export type CatalogueSection = {
   title: string;
   summary?: string;
   links: CatalogueLink[];
+  /** Body paragraphs for statement sections that carry copy rather than links. */
+  body?: string[];
+  /** Plain list items (e.g. the Safety page's online / offline safety lists). */
+  bullets?: string[];
+  /** Optional call to action at the foot of the section. */
+  ctaLabel?: string;
+  ctaHref?: string;
+  /** Optional supporting photograph. */
+  image?: string;
 };
 
 export type ServiceCatalogue = {
   slug: string;
   variant?: "grid" | "safety";
+  /** Closing pull-quote, where the source page has one. */
+  quote?: { text: string; attribution?: string };
   intro?: string[];
   sections: CatalogueSection[];
   policyHref?: string;
   policyLabel?: string;
 };
 
-const wp = (path: string) => `https://www.faithassociates.co.uk/wp-content/uploads/${path}`;
+/**
+ * Service artwork lifted from the WordPress site and served locally, so the pages
+ * keep working once faithassociates.co.uk is retired.
+ */
+const wp = (path: string) => `/assets/services/${path.split("/").pop()}`;
 
 /** Individual service / training detail pages (shared across catalogues). */
 export const serviceOfferings: EditorialPageData[] = [
@@ -46,6 +61,44 @@ export const serviceOfferings: EditorialPageData[] = [
       { title: "Practical toolkit", body: "Policy templates, role guidance, volunteer frameworks and Charity Commission compliance support." },
     ],
     outcomes: ["Clearer trustee roles", "Stronger policy foundations", "Practical compliance awareness", "A pathway toward higher institutional standards"],
+    duration: "One day",
+    cost: "Price on enquiry",
+    chips: ["In-person masterclass"],
+    quickFacts: [
+      { label: "Duration", value: "One day" },
+      { label: "Format", value: "In-person workshops and presentations" },
+      { label: "Delivered by", value: "Mosque management and legal-compliance specialists" },
+      { label: "Cost", value: "Price on enquiry" },
+    ],
+    audience: [
+      "Mosque trustees and committee members",
+      "Islamic centre managers and administrators",
+      "Madrassah leads and safeguarding officers",
+      "Volunteers stepping into management or governance roles",
+    ],
+    agendaTitle: "Mosque management training content",
+    agenda: [
+      { title: "Beacon Mosque Standards", body: "Developing a 21st-century Beacon Mosque and understanding what a 5-star compliant institution looks like." },
+      { title: "Trustee rights and responsibilities", body: "Clear governance duties for management committee members." },
+      { title: "Risk assessment and safe fundraising", body: "Practical controls for common institutional risks." },
+      { title: "Strategic vision", body: "Building direction, structure and improvement priorities for the mosque." },
+      { title: "Policies, procedures and safeguarding", body: "The documents and working practices needed for safer, accountable delivery." },
+    ],
+    materialsTitle: "Training materials included",
+    materials: [
+      "Roles and Responsibilities of Management Committee Members booklet",
+      "Imam Job Advert workshop",
+      "Mosque and Madrassah Quarterly material",
+      "Building Islamic Faith Leaders workshop",
+      "9 Core Critical Success Indicators",
+      "Mosque hierarchy and structure worksheet",
+      "Recruitment policy booklet",
+      "Complaints and grievances procedure booklet",
+      "Mosque volunteer policy guidelines",
+      "National Association of Madrassahs brochure",
+      "Imams Online brochure",
+      "Safe Giving Zakat infographic",
+    ],
   },
   {
     slug: "2-day-mosque-management-governance-master-class-training",
@@ -65,6 +118,34 @@ export const serviceOfferings: EditorialPageData[] = [
       { title: "Implementation support", body: "Materials, templates and specialist advice on issues facing your mosque." },
     ],
     outcomes: ["Deeper governance capability", "Stronger financial and operational controls", "Better-aligned leadership teams", "A clear improvement agenda"],
+    duration: "Two days",
+    cost: "Price on enquiry",
+    chips: ["Advanced programme"],
+    quickFacts: [
+      { label: "Duration", value: "Two days" },
+      { label: "Level", value: "Advanced — builds on the one-day masterclass" },
+      { label: "Format", value: "In-person workshops and presentations" },
+      { label: "Cost", value: "Price on enquiry" },
+    ],
+    audience: [
+      "Trustees and senior committee members",
+      "Mosque managers and administrators",
+      "Madrassah management teams",
+      "Institutions seeking deeper governance and compliance support",
+    ],
+    agendaTitle: "Training content",
+    agenda: [
+      { title: "Developing a 21st-century mosque", body: "Beacon Mosque standards and what a compliant, high-performing institution looks like." },
+      { title: "Trustee rights and responsibilities" },
+      { title: "Risk assessment and safe fundraising" },
+      { title: "Strategic vision and institutional planning" },
+      { title: "Policies and procedures" },
+      { title: "Financial management" },
+      { title: "Madrassah management" },
+      { title: "Safeguarding" },
+      { title: "Community development" },
+      { title: "Legal structures and frameworks" },
+    ],
   },
   {
     slug: "safer-recruitment-training",
@@ -76,14 +157,45 @@ export const serviceOfferings: EditorialPageData[] = [
     intro: [
       "Safer Recruitment training supports institutions to employ the best candidates while protecting children, adults at risk and the organisation itself.",
       "It is essential for anyone responsible for hiring — whether for paid roles or volunteer positions.",
+      "The training helps mosque, madrassah and centre teams follow consistent procedures so the safety of students, staff and the wider institution is treated as a core recruitment responsibility.",
     ],
     highlights: [
       { title: "Safer processes", body: "Practical steps for advertising, shortlisting, interviewing and appointment." },
       { title: "Checks & references", body: "How to handle disclosures, references and suitability decisions consistently." },
-      { title: "Role clarity", body: "Clear expectations for managers, teachers, administrators and volunteers." },
-      { title: "Institutional protection", body: "Reduce risk while building a capable, trusted workforce." },
+      { title: "Hiring responsibilities", body: "Clear expectations for managers, teachers, administrators, trustees and volunteers involved in recruitment." },
+      { title: "Institutional protection", body: "Reduce avoidable risk while building a capable, trusted workforce around children and adults at risk." },
     ],
     outcomes: ["Safer hiring decisions", "Consistent recruitment practice", "Clearer role expectations", "Stronger protection for the institution"],
+    duration: "One day",
+    cost: "£595 + VAT for up to 20 delegates",
+    certificate:
+      "Attendees receive a certificate after participating for the full duration of the course.",
+    quickFacts: [
+      { label: "Duration", value: "One day" },
+      { label: "Cost", value: "£595 + VAT for up to 20 delegates" },
+      { label: "Certificate", value: "Issued on full participation" },
+      {
+        label: "Safeguarding guidance",
+        value:
+          "At least two members of an organisation, including one board member, should take this training every five years.",
+      },
+    ],
+    audience: [
+      "Board members and trustees involved in recruitment",
+      "Mosque and madrassah managers",
+      "Head teachers, teachers and administrators",
+      "Volunteer coordinators and safeguarding leads",
+    ],
+    agendaTitle: "Training content",
+    agenda: [
+      { title: "Recruitment overview" },
+      { title: "Risk factors and legislation" },
+      { title: "Preparing job descriptions" },
+      { title: "Advertising a vacancy and using application forms" },
+      { title: "Reviewing and selecting candidates for interview" },
+      { title: "Pre-employment checks, references and DBS" },
+      { title: "Induction and monitoring of new staff" },
+    ],
   },
   {
     slug: "first-aid-training-for-mosques-and-madrassahs",
@@ -191,14 +303,50 @@ export const serviceOfferings: EditorialPageData[] = [
     intro: [
       "Faith Associates has developed training programmes exclusively for women, supporting participation in mosque governance, management and service delivery.",
       "The focus is practical capability — so women can contribute confidently inside the institutions that serve their communities.",
+      "The programme connects training with the Muslim Women, Mosque Governance, Management and Service Delivery Guide, helping institutions create clearer routes for women to shape decisions and improve services.",
     ],
     highlights: [
-      { title: "Leadership capability", body: "Knowledge and tools for governance, management and service roles." },
-      { title: "Institutional context", body: "Training shaped around mosque and Islamic centre environments." },
-      { title: "Inclusive practice", body: "Support for institutions widening participation in leadership." },
-      { title: "Peer learning", body: "Space to build confidence alongside other women in the sector." },
+      { title: "Leadership capability", body: "Knowledge and tools for governance, management, service design and decision-making roles." },
+      { title: "Institutional context", body: "Training shaped around mosque and Islamic centre structures, committees and day-to-day delivery." },
+      { title: "Inclusive practice", body: "Support for institutions widening participation so women can contribute to stronger community services." },
+      { title: "Guide-led learning", body: "Practical discussion rooted in the women in mosque governance and service delivery guide." },
     ],
     outcomes: ["Greater leadership confidence", "Clearer pathways into governance roles", "Stronger inclusive practice", "Practical tools for day-to-day contribution"],
+    duration: "One day",
+    cost: "Price on enquiry",
+    quickFacts: [
+      { label: "Duration", value: "One day" },
+      { label: "Format", value: "Women-only training programme" },
+      {
+        label: "Based on",
+        value:
+          "Muslim Women, Mosque Governance, Management and Service Delivery Guide",
+      },
+      { label: "Cost", value: "Price on enquiry" },
+    ],
+    audience: [
+      "Women seeking to contribute to mosque governance and service delivery",
+      "Mosque leaders looking to widen participation",
+      "Institutions developing more inclusive leadership pathways",
+      "Community activists, volunteers and emerging leaders",
+    ],
+    agendaTitle: "Training structure",
+    agenda: [
+      {
+        title: "Historical Reference",
+        body: "Examples of women as pillars of mosques at the time of the Prophet, showing their important roles in mosque life.",
+      },
+      {
+        title: "Solutions",
+        body: "Practical examples of roles needed in the running of a mosque, including convert care, counselling services, chaplaincy and staff recruitment.",
+      },
+      {
+        title: "Sustainability",
+        body: "How mosques can ensure different roles are managed by different members of the community successfully over the long term.",
+      },
+    ],
+    secondaryCtaLabel: "Download the guide",
+    secondaryCtaHref: "/publications/muslim-women-mosque-governance-management-and-service-delivery-guide",
   },
   {
     slug: "mosque-policy-and-procedure-development",
@@ -235,6 +383,61 @@ export const serviceOfferings: EditorialPageData[] = [
       { title: "Post-election support", body: "Result tabulation, transparent communication and structured dispute resolution." },
     ],
     outcomes: ["A fair and trusted process", "Higher accessibility and participation", "Secure handling of votes and data", "Clear, transparent results"],
+    ctaLabel: "Guide my election",
+    externalUrl: "https://beaconmosque.com",
+    secondaryCtaLabel: "Visit Beacon Mosque",
+    secondaryCtaHref: "https://beaconmosque.com",
+    // Live embed lifted from faithassociates.co.uk/mosque-election-management/
+    zohoFormUrl: "https://zfrmz.eu/kBHoqCaeCvfuvnAoOW06",
+    quickFacts: [
+      { label: "Service", value: "End-to-end or stage-by-stage election support" },
+      { label: "Covers", value: "Voter registration through to result declaration" },
+      { label: "Assurance", value: "Independent monitoring and compliance oversight" },
+      { label: "Cost", value: "Price on enquiry" },
+    ],
+    audience: [
+      "Mosque trustees and election committees",
+      "Institutions planning a new election cycle",
+      "Mosques needing independent oversight or process assurance",
+      "Communities seeking a clearer and more trusted election process",
+    ],
+    agendaTitle: "Our services",
+    agenda: [
+      {
+        title: "Voter registration and management",
+        body: "Secure, accessible registration and accurate records for eligible community members.",
+      },
+      {
+        title: "Election planning and strategy",
+        body: "Timelines, role assignment, resource planning and communications for each phase of the election.",
+      },
+      {
+        title: "Voting system setup and management",
+        body: "Traditional ballot or electronic voting options, with integrity and confidentiality built in.",
+      },
+      {
+        title: "Monitoring and compliance",
+        body: "Oversight to help elections run fairly and in line with local laws and Islamic principles.",
+      },
+      {
+        title: "Post-election support",
+        body: "Result tabulation, dispute resolution and transparent communication of outcomes.",
+      },
+    ],
+    benefits: [
+      {
+        title: "Transparency and integrity",
+        body: "A fair process that upholds community trust.",
+      },
+      {
+        title: "Efficiency and accessibility",
+        body: "Smoother operations and accessible voting methods that support participation.",
+      },
+      {
+        title: "Compliance and security",
+        body: "Protection for the sanctity of every vote and the credibility of the election.",
+      },
+    ],
   },
   {
     slug: "mosque-security-risk-assessment",
@@ -681,21 +884,38 @@ export const serviceCatalogues: ServiceCatalogue[] = [
       {
         id: "stand-for",
         title: "What we stand for",
-        summary:
-          "Protect the welfare of children and adults online and in Islamic institutions, and protect mosques and congregations from a security point of view.",
+        body: [
+          "Faith Associates are seen as safety experts in faith-based establishments, providing award-winning safety training to mosques and madrassahs globally for over 15 years.",
+        ],
+        bullets: [
+          "Protect the welfare of children and adults online and in Islamic institutions.",
+          "Protect mosques and congregations from a security point of view.",
+          "Improve quality standards and develop training that benefits mosques and madrassahs.",
+        ],
+        image: "/assets/real/security-training-session.jpg",
         links: [],
       },
       {
         id: "work-for-change",
         title: "Our work for change",
-        summary: "Fifteen years improving quality standards and developing training that benefits mosques and madrassahs.",
+        body: [
+          "Our safety work runs on two fronts. Online, we equip young people, teachers and faith leaders to recognise harm, challenge hate and build resilience. Offline, we train mosque and madrassah teams in safeguarding, incident response and the protective security of the building and congregation.",
+          "Fifteen years of delivery has produced accredited courses, national guidance and published toolkits that institutions use in daily practice.",
+        ],
+        ctaLabel: "Talk to our safety team",
+        ctaHref: "/contact",
         links: [],
       },
       {
         id: "digital-ambassadors",
         title: "Muslim Digital Safety Ambassadors Programme",
         summary:
-          "A free interactive mentoring, technical and peer-led classroom programme that helps young Muslims challenge hate, react positively and build resilience.",
+          "A free interactive mentoring, technical and peer-led classroom-based training programme.",
+        body: [
+          "The programme gives young Muslims the confidence to challenge hate, react positively and build resilience among their peer groups.",
+          "Training and support are provided online through a secure portal and in the classroom through face-to-face training. Model Digital Citizens work is supported by Google and the London Mayor’s Office, and concludes with a presentation ceremony in London.",
+        ],
+        image: "/assets/real/faith-training-speaker.jpg",
         links: [offer("digital-safety-ambassadors-programme")],
       },
       {
@@ -703,8 +923,11 @@ export const serviceCatalogues: ServiceCatalogue[] = [
         title: "Online safety",
         summary:
           "Through training, publications and portals, Faith Associates helps safeguard children and adults at risk in the online world.",
+        ctaLabel: "Visit our safety publications",
+        ctaHref: "/publications",
         links: [
           pub("keeping-muslims-safe-online", "Facebook Safety Guide"),
+          pub("keeping-muslims-safe-online", "Keeping Young Muslims Safe Online workshop"),
           offer("digital-safety-ambassadors-programme", "Digital Safety Ambassadors Programme"),
           pub("muslim-digital-citizens-guide", "Muslim Digital Citizens Guide (Infographic)"),
           pub("muslim-digital-citizens-guide-animated-version", "Muslim Digital Citizens Guide (Animation)"),
@@ -716,6 +939,8 @@ export const serviceCatalogues: ServiceCatalogue[] = [
         title: "Offline safety",
         summary:
           "Award-winning safeguarding, madrassah and mosque security training tailored for mosque and madrassah leaders.",
+        ctaLabel: "See our safety services",
+        ctaHref: "/services/safeguarding",
         links: [
           pub("madrassah-management-and-safeguarding", "Madrassah Safeguarding Guide"),
           pub("safeguarding-guide-2016", "Safeguarding guide for Faith Institutions"),
@@ -724,9 +949,37 @@ export const serviceCatalogues: ServiceCatalogue[] = [
         ],
       },
       {
+        id: "safety-partnerships",
+        title: "Partnerships",
+        summary:
+          "Safety work has been delivered with technology, civic and community partners so faith institutions can access practical, credible guidance.",
+        links: [
+          {
+            title: "Google.org",
+            href: "/about/clients",
+            summary: "Digital citizenship and youth-focused online-safety programmes.",
+            image: "/assets/clients/google-org.jpg",
+          },
+          {
+            title: "Facebook / Meta",
+            href: "/about/clients",
+            summary: "Keeping Muslims Safe Online guidance and responsible digital participation.",
+            image: "/assets/clients/facebook-meta.jpg",
+          },
+          {
+            title: "Nordic Safe Cities",
+            href: "/about/clients",
+            summary: "European collaboration on safer, inclusive and empowered communities.",
+            image: "/assets/clients/nordic-safe-cities.png",
+          },
+        ],
+      },
+      {
         id: "safety-publications",
         title: "Safety publications",
         summary: "Guides, cards and toolkits teams can use in daily practice.",
+        ctaLabel: "Download our safety publications",
+        ctaHref: "/publications",
         links: [
           pub("madrassah-management-and-safeguarding", "Madrassah Management Safeguarding Guide"),
           pub("safeguarding-guide-2016", "Safeguarding guide for Faith Institutions"),
@@ -737,6 +990,10 @@ export const serviceCatalogues: ServiceCatalogue[] = [
         ],
       },
     ],
+    quote: {
+      text: "Every one of you is a protector and guardian and responsible for your wards and things under your care.",
+      attribution: "The Prophet Muhammad (peace be upon him)",
+    },
   },
 ];
 

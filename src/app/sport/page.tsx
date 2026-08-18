@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { EditorialHero } from "../components/EditorialHero";
 import { SiteFooter } from "../components/SiteFooter";
+import { ProofCtaBand } from "../components/ProofCtaBand";
 import { SiteHeader } from "../components/SiteHeader";
+import { ArrowIcon } from "../components/icons";
 import { CmsPage } from "../components/cms/CmsPage";
+import { EditableImage } from "../components/cms/EditableImage";
+import { EditableText } from "../components/cms/EditableText";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
 
 export const metadata: Metadata = {
@@ -36,8 +39,34 @@ const programmes = [
 
 export default async function SportPage() {
   const { settings, page } = await loadCmsPage("/sport");
-  const blocks = page?.blocks as Record<string, any> | undefined;
-  const hero = blocks?.hero;
+  const blocks = page?.blocks as Record<string, unknown> | undefined;
+  const sportBlocks = blocks as
+    | Partial<{
+        hero: { eyebrow: string; title: string; summary: string; image: string };
+        introEyebrow: string;
+        introTitle: string;
+        intro: string[];
+        programmes: typeof programmes;
+        impactEyebrow: string;
+        impactTitle: string;
+        impact: Array<{ value: string; label: string }>;
+      }>
+    | undefined;
+  const hero = blocks?.hero as
+    | Partial<{
+        eyebrow: string;
+        title: string;
+        summary: string;
+        image: string;
+      }>
+    | undefined;
+  const programmesData = sportBlocks?.programmes ?? programmes;
+  const impactData = sportBlocks?.impact ?? [
+    { value: "150+", label: "new cricket activators trained" },
+    { value: "50+", label: "football leaders accredited" },
+    { value: "15+", label: "UK cities reached through cricket" },
+    { value: "500+", label: "people at the inaugural Fattah Cup" },
+  ];
   return (
     <CmsPage path="/sport" blocks={page?.blocks}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
@@ -47,84 +76,122 @@ export default async function SportPage() {
         title={hero?.title ?? "Faith and sport: a force for generational change."}
         summary={hero?.summary ?? "Working with national sporting bodies to take accessible activity, leadership pathways and lasting opportunity into faith institutions."}
         image={hero?.image ?? "/assets/inclusivity-sport.png"}
-        primaryLabel="Explore sport programmes"
-        primaryHref="#programmes"
-        secondaryLabel="Partner with us"
-        secondaryHref="/contact"
+        primaryLabel="Enquire"
+        primaryHref="/contact"
+        secondaryLabel="Browse programmes"
+        secondaryHref="#programmes"
       />
 
-      <section className="bg-[var(--soft)] py-12 lg:py-20">
-        <div className="section-shell grid gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:gap-16">
+      <section className="band-tight band-soft">
+        <div className="section-shell grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-end lg:gap-16">
           <div>
-            <p className="type-eyebrow text-[var(--blue)]">Our approach</p>
+            <p className="type-eyebrow text-[var(--blue)]">
+              <EditableText value={sportBlocks?.introEyebrow ?? "Our approach"} path="introEyebrow" />
+            </p>
             <h2 className="type-display mt-4 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-              Bring opportunity to the spaces people already trust.
+              <EditableText value={sportBlocks?.introTitle ?? "Bring opportunity to the spaces people already trust."} path="introTitle" />
             </h2>
+            <div className="rule-red mt-6" />
           </div>
           <div className="space-y-5">
             <p className="type-body text-[var(--muted)] lg:text-[1.05rem]">
-              Faith and sport are two powerful sources of connection. Faith Associates brings them
-              together so children, women, volunteers and emerging leaders can access opportunity
-              through familiar community settings.
+              <EditableText
+                value={sportBlocks?.intro?.[0] ?? "Faith and sport are two powerful sources of connection. Faith Associates brings them together so children, women, volunteers and emerging leaders can access opportunity through familiar community settings."}
+                path="intro.0"
+                multiline
+              />
             </p>
             <p className="type-body text-[var(--muted)] lg:text-[1.05rem]">
-              Our partnerships with national bodies in football and cricket combine high-quality
-              sporting pathways with an extensive network of faith institutions across the UK.
+              <EditableText
+                value={sportBlocks?.intro?.[1] ?? "Our partnerships with national bodies in football and cricket combine high-quality sporting pathways with an extensive network of faith institutions across the UK."}
+                path="intro.1"
+                multiline
+              />
             </p>
           </div>
         </div>
       </section>
 
-      <section id="programmes" className="scroll-mt-6 py-12 lg:py-20">
+      <section id="programmes" className="band band-white scroll-mt-24">
         <div className="section-shell">
-          <div className="grid gap-7 md:grid-cols-3">
-            {programmes.map((programme) => (
-              <Link href={programme.href} key={programme.title} className="group">
-                <div className="media-frame relative aspect-[1.12/1]">
-                  <Image
+          <h2 className="type-display max-w-[16ch] text-[clamp(1.85rem,3.4vw,2.8rem)] text-[var(--ink)]">
+            Sport programmes
+          </h2>
+          <div className="rule-red mt-6" />
+          <div className="mt-9 grid gap-px bg-[var(--line)] sm:grid-cols-2 lg:grid-cols-3">
+            {programmesData.map((programme, index) => (
+              <article key={programme.title} className="group relative flex flex-col bg-white">
+                <div className="media-frame relative aspect-[4/3] w-full overflow-hidden">
+                  <EditableImage
                     src={programme.image}
                     alt=""
+                    path={`programmes.${index}.image`}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="media-zoom object-cover"
                   />
+                  <span className="absolute left-0 top-0 flex size-12 items-center justify-center bg-[var(--navy)] text-[13px] font-semibold tracking-[0.08em] text-white sm:size-14">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
-                <div className="border-t border-[var(--line)] pt-5">
-                  <h2 className="type-title text-[1.35rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)]">
-                    {programme.title}
-                  </h2>
-                  <p className="type-body mt-3 text-sm text-[var(--muted)]">{programme.body}</p>
-                  <span className="type-cta mt-5 inline-flex text-[var(--blue)]">Explore programme →</span>
+                <div className="flex flex-1 flex-col justify-between p-6">
+                  <div>
+                    <h3 className="type-title text-[1.3rem] text-[var(--ink)] transition duration-300 group-hover:text-[var(--blue)]">
+                      <Link href={programme.href}>
+                        <span className="absolute inset-0" aria-hidden="true" />
+                        <EditableText value={programme.title} path={`programmes.${index}.title`} />
+                      </Link>
+                    </h3>
+                    <p className="type-body mt-3 text-[0.95rem] text-[var(--muted)]">
+                      <EditableText value={programme.body} path={`programmes.${index}.body`} multiline />
+                    </p>
+                  </div>
+                  <span
+                    aria-hidden="true"
+                    className="mt-6 inline-flex size-11 items-center justify-center bg-[var(--soft)] text-[var(--blue)] transition group-hover:bg-[var(--red)] group-hover:text-white"
+                  >
+                    <ArrowIcon />
+                  </span>
                 </div>
-              </Link>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[var(--navy)] py-12 text-white lg:py-20">
-        <div className="section-shell grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-16">
+      <section className="band band-navy">
+        <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <div>
-            <p className="type-eyebrow text-white/45">Portfolio impact</p>
+            <p className="type-eyebrow">
+              <EditableText value={sportBlocks?.impactEyebrow ?? "Portfolio impact"} path="impactEyebrow" />
+            </p>
             <h2 className="type-display mt-4 text-[clamp(1.85rem,3.6vw,2.75rem)]">
-              Participation is only the beginning.
+              <EditableText value={sportBlocks?.impactTitle ?? "Participation is only the beginning."} path="impactTitle" />
             </h2>
+            <div className="rule-red mt-6" />
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            {[
-              ["150+", "new cricket activators trained"],
-              ["50+", "football leaders accredited"],
-              ["15+", "UK cities reached through cricket"],
-              ["500+", "people at the inaugural Fattah Cup"],
-            ].map(([value, label]) => (
-              <div key={label} className="border-t border-white/14 pt-5">
-                <p className="type-display text-[2.25rem]">{value}</p>
-                <p className="type-body mt-2 text-sm text-white/55">{label}</p>
+          <div className="grid gap-px bg-white/14 sm:grid-cols-2">
+            {impactData.map((item, index) => (
+              <div key={item.label} className="bg-[var(--navy)] p-5 lg:p-6">
+                <p className="stat-figure text-[clamp(1.9rem,3.2vw,2.9rem)] text-white">
+                  <EditableText value={item.value} path={`impact.${index}.value`} />
+                </p>
+                <p className="type-body mt-3 text-sm">
+                  <EditableText value={item.label} path={`impact.${index}.label`} multiline />
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
+      <ProofCtaBand
+        eyebrow="Partner with us"
+        title="Bring a sport programme to your institution."
+        primaryLabel="Talk to the team"
+        secondaryLabel="See our projects"
+        secondaryHref="/projects"
+      />
+
       <SiteFooter settings={settings} />
     </main>
     </CmsPage>

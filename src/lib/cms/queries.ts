@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { localSeed } from "./seed-data";
 import type {
-  EditorProfile,
   EntryRecord,
   HomeBlocks,
+  PageRecord,
   SiteSettingsData,
 } from "./types";
 
@@ -53,11 +53,12 @@ export async function getPage(
       : null;
   }
   try {
-    const { data, error } = await publicClient()
+    const query = publicClient()
       .from("pages")
       .select("path, title, blocks, draft_blocks, status")
-      .eq("path", path)
-      .maybeSingle();
+      .eq("path", path);
+    if (!opts?.preferDraft) query.eq("status", "published");
+    const { data, error } = await query.maybeSingle();
     if (error || !data) {
       return fallback
         ? { path: fallback.path, title: fallback.title, blocks: fallback.blocks }
@@ -72,6 +73,40 @@ export async function getPage(
     return fallback
       ? { path: fallback.path, title: fallback.title, blocks: fallback.blocks }
       : null;
+  }
+}
+
+export async function getPages(opts?: { preferDraft?: boolean }): Promise<PageRecord[]> {
+  const fallback = localSeed.pages;
+
+  if (!isConfigured()) return fallback;
+
+  try {
+    const query = publicClient()
+      .from("pages")
+      .select("path, title, blocks, draft_blocks, status")
+      .order("path", { ascending: true });
+    if (!opts?.preferDraft) query.eq("status", "published");
+    const { data, error } = await query;
+    if (error || !data?.length) return fallback;
+    const merged = new Map(
+      fallback.map((page) => [page.path, page] as const),
+    );
+    data.forEach((row) => {
+      merged.set(row.path, {
+        path: row.path,
+        title: row.title ?? undefined,
+        blocks:
+          opts?.preferDraft && row.draft_blocks
+            ? (row.draft_blocks as Record<string, unknown>)
+            : ((row.blocks as Record<string, unknown>) ?? {}),
+        draft_blocks: row.draft_blocks as Record<string, unknown> | null,
+        status: row.status as PageRecord["status"],
+      });
+    });
+    return Array.from(merged.values()).sort((a, b) => a.path.localeCompare(b.path));
+  } catch {
+    return fallback;
   }
 }
 
@@ -95,22 +130,30 @@ export async function getEntries(
   if (!isConfigured()) return fallback;
 
   try {
-    const { data, error } = await publicClient()
+    const query = publicClient()
       .from("entries")
       .select("type, slug, data, draft_data, sort_order, status")
       .eq("type", type)
       .order("sort_order", { ascending: true });
+    if (!opts?.preferDraft) query.eq("status", "published");
+    const { data, error } = await query;
     if (error || !data?.length) return fallback;
-    return data.map((row) => ({
-      type: row.type,
-      slug: row.slug,
-      data:
-        opts?.preferDraft && row.draft_data
-          ? (row.draft_data as Record<string, unknown>)
-          : (row.data as Record<string, unknown>),
-      sort_order: row.sort_order,
-      status: row.status as EntryRecord["status"],
-    }));
+    const merged = new Map(
+      fallback.map((entry) => [`${entry.type}:${entry.slug}`, entry] as const),
+    );
+    data.forEach((row) => {
+      merged.set(`${row.type}:${row.slug}`, {
+        type: row.type,
+        slug: row.slug,
+        data:
+          opts?.preferDraft && row.draft_data
+            ? (row.draft_data as Record<string, unknown>)
+            : (row.data as Record<string, unknown>),
+        sort_order: row.sort_order,
+        status: row.status as EntryRecord["status"],
+      });
+    });
+    return Array.from(merged.values()).sort((a, b) => a.sort_order - b.sort_order);
   } catch {
     return fallback;
   }
@@ -125,12 +168,13 @@ export async function getEntry(
     localSeed.entries.find((e) => e.type === type && e.slug === slug) ?? null;
   if (!isConfigured()) return fallback;
   try {
-    const { data, error } = await publicClient()
+    const query = publicClient()
       .from("entries")
       .select("type, slug, data, draft_data, sort_order, status")
       .eq("type", type)
-      .eq("slug", slug)
-      .maybeSingle();
+      .eq("slug", slug);
+    if (!opts?.preferDraft) query.eq("status", "published");
+    const { data, error } = await query.maybeSingle();
     if (error || !data) return fallback;
     return {
       type: data.type,

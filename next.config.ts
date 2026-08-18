@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: "https",
@@ -23,6 +24,35 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/login", destination: "/cms", permanent: false },
+      // Legacy WordPress URLs for the individual training courses. Only three of the
+      // 24 offerings had redirects before, so the rest 404'd after the rebuild.
+      ...[
+        "1-day-mosque-management-governance-master-class-training",
+        "2-day-mosque-management-governance-master-class-training",
+        "safer-recruitment-training",
+        "first-aid-training-for-mosques-and-madrassahs",
+        "covid-19-risk-assessment-training-for-mosques-and-madrassahs",
+        "mosque-security-training",
+        "protect-duty-and-martyns-law-training",
+        "beacon-mosque-accreditation",
+        "women-in-mosque-leadership",
+        "strategic-campaign-planning-execution",
+        "strategic-conference-and-event-planning",
+        "media-planning",
+        "away-day-strategic-planning-facilitation-for-charities-businesses-mosques",
+        "designated-safeguarding-lead",
+        "international-safeguarding-training",
+        "imam-e-safety-training",
+        "child-protection-and-safeguarding",
+        "mosque-safeguarding-review",
+        "madrassah-teacher-training",
+        "imam-chaplaincy-awareness-program",
+        "digital-safety-ambassadors-programme",
+      ].map((slug) => ({
+        source: `/${slug}`,
+        destination: `/services/${slug}`,
+        permanent: true,
+      })),
       { source: "/about-us", destination: "/about", permanent: true },
       { source: "/about-us/company-history", destination: "/about/history", permanent: true },
       { source: "/about-us/our-clients", destination: "/about/clients", permanent: true },

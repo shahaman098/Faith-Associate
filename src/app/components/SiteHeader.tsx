@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback } from "react";
 import type { SiteSettingsData } from "@/lib/cms/types";
 import { EditableText } from "./cms/EditableText";
 import { useEdit } from "./cms/EditProvider";
+import { ChevronDownIcon, CloseIcon, MenuIcon, SearchIcon } from "./icons";
 
 const defaultNavigation: SiteSettingsData["header"]["navigation"] = [
   {
@@ -57,55 +59,12 @@ const defaultNavigation: SiteSettingsData["header"]["navigation"] = [
   },
 ];
 
-function MenuIcon() {
-  return (
-    <svg aria-hidden="true" className="size-6" viewBox="0 0 24 24" fill="none">
-      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="size-5" viewBox="0 0 24 24" fill="none">
-      <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg aria-hidden="true" className="size-5" viewBox="0 0 20 20" fill="none">
-      <path
-        d="m14.5 14.5 3 3M8.75 15.25a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.7"
-      />
-    </svg>
-  );
-}
-
-function ChevronDownIcon({ className = "size-3" }: { className?: string }) {
-  return (
-    <svg aria-hidden="true" className={className} viewBox="0 0 16 16" fill="none">
-      <path
-        d="m4 6 4 4 4-4"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
-}
-
 const socialLinks = [
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/company/faith-associates/",
     icon: (
-      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+      <svg aria-hidden="true" className="size-[18px]" viewBox="0 0 24 24" fill="currentColor">
         <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.5 8.5h4V23h-4V8.5zM8.5 8.5h3.8v2h.05c.53-1 1.82-2.05 3.75-2.05 4.01 0 4.75 2.64 4.75 6.07V23h-4v-6.6c0-1.57-.03-3.59-2.19-3.59-2.19 0-2.53 1.71-2.53 3.48V23h-4V8.5z" />
       </svg>
     ),
@@ -114,7 +73,7 @@ const socialLinks = [
     label: "Facebook",
     href: "https://www.facebook.com/FaithAssociates1/",
     icon: (
-      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+      <svg aria-hidden="true" className="size-[18px]" viewBox="0 0 24 24" fill="currentColor">
         <path d="M22 12.07C22 6.48 17.52 2 11.93 2S1.86 6.48 1.86 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.03H7.9v-2.9h2.4V9.86c0-2.37 1.41-3.68 3.56-3.68 1.03 0 2.12.18 2.12.18v2.33h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.9h-2.22V22c4.78-.75 8.44-4.91 8.44-9.93z" />
       </svg>
     ),
@@ -123,12 +82,42 @@ const socialLinks = [
     label: "X",
     href: "https://x.com/faithassociates",
     icon: (
-      <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="currentColor">
+      <svg aria-hidden="true" className="size-[18px]" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2H21.5l-7.5 8.57L22.5 22h-6.57l-5.14-6.71L5.2 22H1.94l8.03-9.17L1.5 2h6.73l4.64 6.16L18.244 2zm-1.15 18h1.81L7.01 3.94H5.07L17.094 20z" />
       </svg>
     ),
   },
 ];
+
+const servicesNavItem: SiteSettingsData["header"]["navigation"][number] =
+  defaultNavigation.find((item) => item.href === "/services") ?? {
+    label: "Services",
+    href: "/services",
+  };
+
+/**
+ * The live CMS `site_settings` row still carries a legacy "Media centre" entry that
+ * points at /news. The client asked for Services -> /services instead, so rewrite it
+ * here rather than depending on every environment's stored navigation being corrected.
+ */
+function normaliseNavigation(
+  navigation: SiteSettingsData["header"]["navigation"],
+): SiteSettingsData["header"]["navigation"] {
+  const mapped = navigation.map((item) =>
+    /^media(\s|$)/i.test(item.label.trim()) ? servicesNavItem : item,
+  );
+
+  const seen = new Set<string>();
+  const deduped = mapped.filter((item) => {
+    if (seen.has(item.href)) return false;
+    seen.add(item.href);
+    return true;
+  });
+
+  return deduped.some((item) => item.href === "/services")
+    ? deduped
+    : [...deduped, servicesNavItem];
+}
 
 function SocialLinks({ className = "" }: { className?: string }) {
   return (
@@ -140,7 +129,7 @@ function SocialLinks({ className = "" }: { className?: string }) {
           target="_blank"
           rel="noreferrer"
           aria-label={item.label}
-          className="inline-flex size-7 items-center justify-center rounded-full text-current transition hover:bg-white/10 hover:text-white"
+          className="inline-flex size-10 items-center justify-center text-current transition hover:bg-white/10 hover:text-white"
         >
           {item.icon}
         </a>
@@ -152,15 +141,12 @@ function SocialLinks({ className = "" }: { className?: string }) {
 export function SiteHeader({ settings }: { settings?: SiteSettingsData | null }) {
   const { settings: liveSettings } = useEdit();
   const header = liveSettings?.header ?? settings?.header;
-  const navigation = header?.navigation ?? defaultNavigation;
+  const navigation = useMemo(
+    () => normaliseNavigation(header?.navigation ?? defaultNavigation),
+    [header?.navigation],
+  );
   const mobileNavigation = useMemo(
-    () => [
-      { label: "Home", href: "/" },
-      ...navigation.filter((item) => ["About", "Services", "Projects"].includes(item.label)),
-      ...navigation.filter((item) => item.label === "Publications"),
-      ...navigation.filter((item) => item.label === "International"),
-      { label: "Contact us", href: "/contact" },
-    ],
+    () => [{ label: "Home", href: "/" }, ...navigation, { label: "Contact us", href: "/contact" }],
     [navigation],
   );
   const tagline = header?.tagline ?? "Building standards across the globe";
@@ -171,26 +157,34 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navRef = useRef<HTMLElement>(null);
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    setOpenSection(null);
+    setSearchQuery("");
+  }, []);
+  const toggleMenu = useCallback(() => {
+    setMenuOpen((open) => {
+      if (open) {
+        setOpenSection(null);
+        setSearchQuery("");
+      }
+      return !open;
+    });
+  }, []);
 
   useEffect(() => {
-    if (!menuOpen) {
-      setOpenSection(null);
-      setSearchQuery("");
-      return;
-    }
+    if (!menuOpen) return;
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") closeMenu();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = "";
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [menuOpen]);
-
-  const closeMenu = () => setMenuOpen(false);
+  }, [closeMenu, menuOpen]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -211,10 +205,10 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
           Offices
         </Link>
         <Link
-          href="/news"
+          href="/services"
           className="flex h-9 items-center justify-center bg-[var(--blue)] text-[11px] font-extrabold uppercase tracking-[0.12em]"
         >
-          Media
+          Services
         </Link>
         <Link
           href="/contact"
@@ -226,7 +220,7 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
 
       {/* Desktop utility bar */}
       <div className="hidden border-b border-white/10 bg-[#0b1824]/86 text-white backdrop-blur-md lg:block">
-        <div className="section-shell flex h-9 items-center justify-between text-[10px] font-bold uppercase tracking-[0.14em] text-white/58">
+        <div className="section-shell flex h-9 items-center justify-between text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
           <EditableText
             value={tagline}
             path="header.tagline"
@@ -236,13 +230,13 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
           <div className="flex items-center gap-5">
             <SocialLinks />
             <span aria-hidden="true" className="h-3 w-px bg-white/20" />
-            <Link href="/news" className="transition hover:text-white">
-              Media centre
+            <Link href="/services" className="transition hover:text-white">
+              Services
             </Link>
             <a href={`tel:${phoneTel}`} className="transition hover:text-white">
               <EditableText value={phone} path="header.phone" scope="settings" as="span" />
             </a>
-            <Link href="/contact" className="transition hover:text-white">
+            <Link href="/contact" className="text-[var(--red)] transition hover:text-white">
               Contact
             </Link>
           </div>
@@ -257,7 +251,7 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={toggleMenu}
             className={
               menuOpen
                 ? "inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-[#0b2a4a] text-[#0b2a4a] transition hover:bg-[#0b2a4a] hover:text-white"
@@ -304,10 +298,10 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
               <div key={item.href} className="group relative">
                 <Link
                   href={item.href}
-                  className="inline-flex items-center gap-1 py-8 text-[12px] font-bold text-white/82 transition hover:text-white focus-visible:text-white"
+                  className="inline-flex items-center gap-1.5 py-8 text-[14px] font-semibold tracking-[0.005em] text-white/88 transition hover:text-white focus-visible:text-white"
                 >
                   {item.label}
-                  {item.children ? <ChevronDownIcon /> : null}
+                  {item.children ? <ChevronDownIcon className="size-4" /> : null}
                 </Link>
                 {item.children ? (
                   <div className="invisible absolute left-1/2 top-[72px] w-72 -translate-x-1/2 translate-y-2 border border-white/12 bg-[#0b1824]/98 p-3 opacity-0 shadow-[0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
@@ -315,7 +309,7 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
                       <Link
                         key={href}
                         href={href}
-                        className="flex items-center justify-between border-b border-white/8 px-3 py-3 text-sm font-semibold text-white/68 transition last:border-0 hover:bg-white/6 hover:text-white"
+                        className="flex items-center justify-between border-b border-white/10 px-3 py-3.5 text-[15px] font-medium text-white/76 transition last:border-0 hover:bg-white/8 hover:text-white"
                       >
                         {label}
                         <span aria-hidden="true">↗</span>
@@ -346,7 +340,7 @@ export function SiteHeader({ settings }: { settings?: SiteSettingsData | null })
               aria-label={menuOpen ? "Close navigation" : "Open navigation"}
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
-              onClick={() => setMenuOpen((open) => !open)}
+              onClick={toggleMenu}
               className="inline-flex size-11 cursor-pointer items-center justify-center text-white transition hover:text-[var(--red)] xl:hidden"
             >
               {menuOpen ? <CloseIcon /> : <MenuIcon />}

@@ -5,10 +5,12 @@ import { notFound } from "next/navigation";
 import { SiteFooter } from "../../components/SiteFooter";
 import { SiteHeader } from "../../components/SiteHeader";
 import { ZohoFormEmbed } from "../../components/ZohoFormEmbed";
+import { CmsEntry } from "../../components/cms/CmsEntry";
+import { EditableImage } from "../../components/cms/EditableImage";
+import { EditableText } from "../../components/cms/EditableText";
 import { getPublication, publications } from "../../data/publications";
-import { CmsPage } from "../../components/cms/CmsPage";
 import { loadCmsPage } from "@/lib/cms/page-helpers";
-import { getEntry } from "@/lib/cms/queries";
+import { getEntries, getEntry } from "@/lib/cms/queries";
 
 export function generateStaticParams() {
   return publications.map(({ slug }) => ({ slug }));
@@ -41,17 +43,30 @@ function ArrowIcon() {
 
 export default async function PublicationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { settings, page, preferDraft } = await loadCmsPage(`/publications/${slug}`);
-  const entry = await getEntry("publication", slug, { preferDraft });
-  const publication = entry ? ({ slug: entry.slug, ...entry.data } as typeof publications[number]) : getPublication(slug);
+  const { settings, preferDraft } = await loadCmsPage(`/publications/${slug}`);
+  const [entry, publicationEntries] = await Promise.all([
+    getEntry("publication", slug, { preferDraft }),
+    getEntries("publication", { preferDraft }),
+  ]);
+  const basePublication = getPublication(slug);
+  const publication = entry
+    ? ({ ...(basePublication ?? {}), slug: entry.slug, ...entry.data } as typeof publications[number])
+    : basePublication;
   if (!publication) notFound();
+  const { slug: _slug, updated: _updated, ...entryData } = publication;
+  void _slug;
+  void _updated;
 
-  const related = publications
+  const catalogue = publicationEntries.length
+    ? (publicationEntries.map((item) => ({ slug: item.slug, ...item.data })) as typeof publications)
+    : publications;
+
+  const related = catalogue
     .filter((item) => item.slug !== publication.slug && item.category === publication.category)
     .slice(0, 3);
 
   return (
-    <CmsPage path={`/publications/${slug}`} blocks={page?.blocks}>
+    <CmsEntry type="publication" slug={slug} data={entryData}>
     <main id="main-content" className="min-h-screen bg-white text-[var(--ink)]">
       <SiteHeader settings={settings} />
       <section className="relative overflow-hidden bg-[var(--navy)] pb-16 pt-40 text-white lg:pb-24 lg:pt-52">
@@ -61,28 +76,28 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
               href="/publications"
               className="type-meta text-white/48 transition hover:text-white"
             >
-              Publications / {publication.category}
+              Publications / <EditableText value={publication.category} path="category" />
             </Link>
             <h1 className="type-display mt-6 max-w-[15ch] text-[clamp(2.5rem,5vw,4.5rem)]">
-              {publication.title}
+              <EditableText value={publication.title} path="title" />
             </h1>
             <p className="type-body mt-6 max-w-2xl text-base text-white/72 sm:text-lg">
-              {publication.summary}
+              <EditableText value={publication.summary ?? ""} path="summary" multiline />
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-white/12 pt-5 type-meta text-white/44">
-              <span>{publication.format}</span>
-              <span>{publication.year}</span>
-              <span>{publication.category}</span>
+              <span><EditableText value={publication.format} path="format" /></span>
+              <span><EditableText value={publication.year} path="year" /></span>
+              <span><EditableText value={publication.category} path="category" /></span>
             </div>
           </div>
           <div className="media-frame relative mx-auto aspect-[0.72/1] w-full max-w-[380px] bg-white lg:mx-0 lg:justify-self-end">
-            <Image
+            <EditableImage
               src={publication.image}
               alt={`${publication.title} cover`}
+              path="image"
               fill
               unoptimized
               priority
-              loading="eager"
               sizes="(max-width: 1024px) 80vw, 32vw"
               className="object-contain p-4"
             />
@@ -97,9 +112,14 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
               !
             </span>
             <p>
-              <strong className="text-[var(--ink)]">Archived operational guidance.</strong> This
-              resource is preserved for historical reference and may not reflect current public-health,
-              legal or regulatory requirements.
+              <strong className="text-[var(--ink)]">
+                <EditableText value={publication.legacyNoticeTitle} path="legacyNoticeTitle" />
+              </strong>{" "}
+              <EditableText
+                value={publication.legacyNoticeBody}
+                path="legacyNoticeBody"
+                multiline
+              />
             </p>
           </div>
         </div>
@@ -108,52 +128,70 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
       <section className="py-12 lg:py-20">
         <div className="section-shell grid gap-12 lg:grid-cols-[0.75fr_1.35fr] lg:gap-20">
           <aside className="lg:sticky lg:top-8 lg:self-start">
-            <p className="type-eyebrow text-[var(--blue)]">Access the resource</p>
+            <p className="type-eyebrow text-[var(--blue)]">
+              <EditableText value={publication.accessEyebrow} path="accessEyebrow" />
+            </p>
             {publication.downloadUrl ? (
               <a href={publication.downloadUrl} target="_blank" rel="noreferrer" className="btn-primary mt-5">
-                Download publication <ArrowIcon />
+                <EditableText value={publication.downloadCtaLabel} path="downloadCtaLabel" /> <ArrowIcon />
               </a>
             ) : publication.zohoFormUrl ? (
               <a href="#request-form" className="btn-primary mt-5">
-                Request this publication <ArrowIcon />
+                <EditableText value={publication.requestCtaLabel} path="requestCtaLabel" /> <ArrowIcon />
               </a>
             ) : (
               <Link
                 href={`/contact?publication=${encodeURIComponent(publication.title)}`}
                 className="btn-primary mt-5"
               >
-                Request this publication <ArrowIcon />
+                <EditableText value={publication.requestCtaLabel} path="requestCtaLabel" /> <ArrowIcon />
               </Link>
             )}
             <div className="type-body mt-8 border-t border-[var(--line)] pt-6 text-xs text-[var(--muted)]">
-              <p>Published by Faith Associates</p>
-              <p>Resource type: {publication.format}</p>
-              <p>Catalogue year: {publication.year}</p>
+              <p><EditableText value={publication.publishedBy} path="publishedBy" /></p>
+              <p>
+                <EditableText value={publication.resourceTypeLabel} path="resourceTypeLabel" />:{" "}
+                <EditableText value={publication.format} path="format" />
+              </p>
+              <p>
+                <EditableText value={publication.catalogueYearLabel} path="catalogueYearLabel" />:{" "}
+                <EditableText value={publication.year} path="year" />
+              </p>
             </div>
           </aside>
 
           <article className="max-w-3xl">
-            <p className="type-eyebrow text-[var(--blue)]">Overview</p>
+            <p className="type-eyebrow text-[var(--blue)]">
+              <EditableText value={publication.overviewEyebrow} path="overviewEyebrow" />
+            </p>
             <h2 className="type-display mt-5 text-[clamp(1.85rem,3.6vw,2.75rem)] text-[var(--ink)]">
-              Guidance grounded in sector experience.
+              <EditableText value={publication.overviewTitle} path="overviewTitle" />
             </h2>
             <p className="type-title mt-8 text-[1.25rem] text-[var(--ink)] sm:text-[1.4rem]">
-              {publication.summary}
+              <EditableText value={publication.summary ?? ""} path="summary" multiline />
             </p>
             <p className="type-body mt-6 text-[var(--muted)]">
-              Faith Associates develops publications from direct work with faith institutions,
-              leadership teams and delivery partners. The aim is to turn field learning into practical
-              material that can inform discussion, planning and implementation.
+              <EditableText
+                value={publication.overviewBody}
+                path="overviewBody"
+                multiline
+              />
             </p>
 
             {publication.zohoFormUrl ? (
               <div id="request-form" className="mt-12 scroll-mt-28 border-t border-[var(--line)] pt-10">
-                <p className="type-eyebrow text-[var(--blue)]">Request this publication</p>
+                <p className="type-eyebrow text-[var(--blue)]">
+                  <EditableText value={publication.requestEyebrow} path="requestEyebrow" />
+                </p>
                 <h2 className="type-display mt-5 text-[clamp(1.65rem,3vw,2.25rem)] text-[var(--ink)]">
-                  Complete the form below.
+                  <EditableText value={publication.requestTitle} path="requestTitle" />
                 </h2>
                 <p className="type-body mt-4 max-w-2xl text-[var(--muted)]">
-                  Register your details to receive this publication from Faith Associates.
+                  <EditableText
+                    value={publication.requestBody}
+                    path="requestBody"
+                    multiline
+                  />
                 </p>
                 <div className="mt-8">
                   <ZohoFormEmbed
@@ -166,44 +204,36 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
             ) : null}
 
             <div className="mt-12 border-y border-[var(--line)] bg-[var(--soft)] px-6 py-8 sm:px-9">
-              <p className="type-eyebrow text-[var(--blue)]">Using this publication</p>
+              <p className="type-eyebrow text-[var(--blue)]">
+                <EditableText value={publication.usageEyebrow} path="usageEyebrow" />
+              </p>
               <ul className="mt-6 grid gap-4 text-sm leading-7 text-[var(--muted)]">
-                <li className="flex gap-4">
-                  <span className="capability-index">01</span>
-                  <span>
-                    Review the resource with the people responsible for governance or delivery in your
-                    institution.
-                  </span>
-                </li>
-                <li className="flex gap-4">
-                  <span className="capability-index">02</span>
-                  <span>
-                    Adapt recommendations to your context, legal duties, risk profile and available
-                    capacity.
-                  </span>
-                </li>
-                <li className="flex gap-4">
-                  <span className="capability-index">03</span>
-                  <span>
-                    Turn agreed actions into named responsibilities, timescales and a clear review
-                    point.
-                  </span>
-                </li>
+                {publication.usageSteps.map((step, index) => (
+                  <li key={index} className="flex gap-4">
+                    <span className="capability-index">{String(index + 1).padStart(2, "0")}</span>
+                    <span>
+                      <EditableText value={step} path={`usageSteps.${index}`} multiline />
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
 
             <h2 className="type-display mt-12 text-[clamp(1.65rem,3vw,2.25rem)] text-[var(--ink)]">
-              Need help implementing it?
+              <EditableText value={publication.implementationTitle} path="implementationTitle" />
             </h2>
             <p className="type-body mt-5 text-[var(--muted)]">
-              The Faith Associates team can support training, review, policy development and
-              implementation linked to this area of work.
+              <EditableText
+                value={publication.implementationBody}
+                path="implementationBody"
+                multiline
+              />
             </p>
             <Link
               href="/contact"
               className="type-cta mt-6 inline-flex items-center gap-3 text-[var(--blue)] transition duration-300 hover:text-[var(--blue-dark)]"
             >
-              Talk to the team <ArrowIcon />
+              <EditableText value={publication.implementationCtaLabel} path="implementationCtaLabel" /> <ArrowIcon />
             </Link>
           </article>
         </div>
@@ -213,16 +243,18 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
         <div className="section-shell">
           <div className="flex items-end justify-between gap-5">
             <div>
-              <p className="type-eyebrow text-[var(--blue)]">Continue reading</p>
+              <p className="type-eyebrow text-[var(--blue)]">
+                <EditableText value={publication.relatedEyebrow} path="relatedEyebrow" />
+              </p>
               <h2 className="type-display mt-4 text-[clamp(1.75rem,3.2vw,2.5rem)] text-[var(--ink)]">
-                Related publications
+                <EditableText value={publication.relatedTitle} path="relatedTitle" />
               </h2>
             </div>
             <Link
               href="/publications"
               className="type-cta hidden items-center gap-2 text-[var(--blue)] sm:inline-flex"
             >
-              View library <ArrowIcon />
+              <EditableText value={publication.relatedCtaLabel} path="relatedCtaLabel" /> <ArrowIcon />
             </Link>
           </div>
           <div className="mt-8 grid gap-6 md:grid-cols-3">
@@ -251,6 +283,6 @@ export default async function PublicationPage({ params }: { params: Promise<{ sl
       </section>
       <SiteFooter settings={settings} />
     </main>
-    </CmsPage>
+    </CmsEntry>
   );
 }

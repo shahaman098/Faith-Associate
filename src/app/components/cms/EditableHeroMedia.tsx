@@ -44,6 +44,7 @@ export function EditableHeroMedia({
           src={livePoster}
           alt="Hero poster image"
           path="hero.poster"
+          positionPath="hero.posterPosition"
           fill
           priority
           sizes="100vw"

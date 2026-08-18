@@ -33,7 +33,8 @@ export function LoginForm() {
           name="email"
           type="email"
           required
-          defaultValue="cms@faithassociates.co.uk"
+          autoComplete="email"
+          placeholder="name@organisation.com"
           className="mt-1 w-full rounded-lg border border-[var(--line)] px-3 py-2"
         />
       </label>
@@ -43,6 +44,7 @@ export function LoginForm() {
           name="password"
           type="password"
           required
+          autoComplete="current-password"
           className="mt-1 w-full rounded-lg border border-[var(--line)] px-3 py-2"
         />
       </label>

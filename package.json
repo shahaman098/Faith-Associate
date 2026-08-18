@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cms:smoke": "tsx --env-file=.env.local scripts/smoke-cms.ts"
+    "cms:smoke": "node --env-file=.env.local --import tsx scripts/smoke-cms.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
